@@ -131,19 +131,39 @@ def get_memoria():
 
 def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, banderas, recomendacion):
     """Guarda el análisis de hoy en Supabase"""
+    # Calcular horas de sueño
+    horas_sueno = None
+    if wellness_hoy.get("sleepSecs"):
+        horas_sueno = round(wellness_hoy["sleepSecs"] / 3600, 2)
+    elif wellness_hoy.get("sleepHours"):
+        horas_sueno = wellness_hoy["sleepHours"]
+
+    # Limpiar actividades para no enviar datos gigantes
+    actividades_limpias = []
+    for a in actividades_hoy:
+        actividades_limpias.append({
+            "id": a.get("id"),
+            "name": a.get("name"),
+            "type": a.get("type"),
+            "duration_minutes": a.get("moving_time", 0) // 60,
+            "distance_km": round(a.get("distance", 0) / 1000, 2),
+            "tss": a.get("training_load"),
+            "avg_hr": a.get("average_heartrate")
+        })
+
     data = {
         "fecha": fecha,
         "hrv": wellness_hoy.get("hrv"),
         "fc_reposo": wellness_hoy.get("restingHeartRate"),
-        "horas_sueno": wellness_hoy.get("sleepSecs", 0) / 3600 if wellness_hoy.get("sleepSecs") else wellness_hoy.get("sleepHours"),
+        "horas_sueno": horas_sueno,
         "sleep_score": wellness_hoy.get("sleepScore"),
         "ctl": wellness_hoy.get("ctl"),
         "atl": wellness_hoy.get("atl"),
         "tsb": wellness_hoy.get("tsb"),
-        "actividades_hoy": json.dumps(actividades_hoy),
-        "tss_dia": tss_dia,
+        "actividades_hoy": actividades_limpias,  # JSONB directo, no string
+        "tss_dia": int(tss_dia) if tss_dia else None,
         "mensaje_telegram": mensaje,
-        "banderas": json.dumps(banderas),
+        "banderas": banderas,  # JSONB directo, no string
         "recomendacion": recomendacion
     }
     # Eliminar nulos para no sobreescribir con null
@@ -351,16 +371,25 @@ def main():
     print(f"   ✓ Banderas: {metadata.get('banderas', [])}")
     print(f"   ✓ Patrones nuevos: {len(metadata.get('patrones_nuevos', []))}")
 
-    print("4. Guardando en Supabase...")
-    guardar_analisis(
-        fecha=today_str,
-        wellness_hoy=wellness_hoy,
-        actividades_hoy=actividades_hoy,
-        tss_dia=tss_dia,
-        mensaje=mensaje,
-        banderas=metadata.get("banderas", []),
-        recomendacion=metadata.get("recomendacion", "")
-    )
+    print("4. Enviando a Telegram...")
+    send_telegram(mensaje)
+    print("   ✓ Mensaje enviado!")
+
+    print("5. Guardando en Supabase...")
+    try:
+        guardar_analisis(
+            fecha=today_str,
+            wellness_hoy=wellness_hoy,
+            actividades_hoy=actividades_hoy,
+            tss_dia=tss_dia,
+            mensaje=mensaje,
+            banderas=metadata.get("banderas", []),
+            recomendacion=metadata.get("recomendacion", "")
+        )
+        print("   ✓ Análisis guardado en base de datos")
+    except Exception as e:
+        print(f"   ⚠ Error guardando análisis: {e}")
+
     # Guardar patrones nuevos detectados
     for patron in metadata.get("patrones_nuevos", []):
         try:
@@ -369,13 +398,9 @@ def main():
                 patron.get("descripcion", ""),
                 patron.get("severidad", "info")
             )
+            print(f"   ✓ Patrón guardado: {patron.get('descripcion', '')[:50]}")
         except Exception as e:
             print(f"   ⚠ Error guardando patrón: {e}")
-    print("   ✓ Guardado en base de datos")
-
-    print("5. Enviando a Telegram...")
-    send_telegram(mensaje)
-    print("   ✓ Mensaje enviado!")
 
     print("\n✅ Done. El coach habló.")
 
