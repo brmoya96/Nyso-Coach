@@ -2,15 +2,15 @@ name: Coach Triatlón - Mensaje Diario
 
 on:
   schedule:
-    # 5:50am hora Santiago (Chile Winter UTC-4 = 9:50am UTC)
-    # Chile Summer (Oct-Mar) es UTC-3 = cambiar a 08:50 UTC
+    # 5:50am hora Santiago invierno (UTC-4) = 9:50am UTC
+    # Si es verano chileno (Oct-Mar) cambiar a: '50 8 * * *'
     - cron: '50 9 * * *'
-  workflow_dispatch:  # permite correrlo manualmente desde GitHub
+  workflow_dispatch:
 
 jobs:
   send-daily-message:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -30,4 +30,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python coach_triatlon.py
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python coach_triatlon_v2.py
