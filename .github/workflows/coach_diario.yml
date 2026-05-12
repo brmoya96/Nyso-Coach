@@ -1,0 +1,33 @@
+name: Coach Triatlón - Mensaje Diario
+
+on:
+  schedule:
+    # 5:50am hora Santiago (Chile Winter UTC-4 = 9:50am UTC)
+    # Chile Summer (Oct-Mar) es UTC-3 = cambiar a 08:50 UTC
+    - cron: '50 9 * * *'
+  workflow_dispatch:  # permite correrlo manualmente desde GitHub
+
+jobs:
+  send-daily-message:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests anthropic
+
+      - name: Correr el agente
+        env:
+          INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python coach_triatlon.py
