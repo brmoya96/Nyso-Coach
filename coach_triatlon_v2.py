@@ -127,6 +127,15 @@ def get_memoria():
     except:
         memoria["carreras_recientes"] = []
 
+    # Historia del atleta
+    try:
+        memoria["historia"] = supabase_get(
+            "historia_atleta",
+            "order=importancia.desc&limit=20"
+        )
+    except:
+        memoria["historia"] = []
+
     return memoria
 
 def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, banderas, recomendacion):
@@ -276,6 +285,9 @@ FECHA HOY: {today}
 ### Carreras recientes:
 {json.dumps(memoria.get("carreras_recientes", []), indent=2)}
 
+### Historia del atleta (contexto profundo):
+{json.dumps(memoria.get("historia", []), indent=2)}
+
 ### Promedios históricos calculados:
 - HRV promedio histórico: {hrv_promedio}
 - Sueño promedio histórico: {sueno_promedio}h
@@ -380,6 +392,7 @@ def main():
     print(f"   ✓ Patrones activos: {len(memoria['patrones_activos'])}")
     print(f"   ✓ Perfil: {len(memoria['perfil'])} campos")
     print(f"   ✓ Carreras: {len(memoria['carreras_recientes'])}")
+    print(f"   ✓ Historia: {len(memoria['historia'])} entradas")
 
     print("3. Analizando con Claude...")
     mensaje, metadata, actividades_hoy, tss_dia, wellness_hoy = analizar_con_claude(
