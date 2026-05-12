@@ -131,43 +131,61 @@ def get_memoria():
 
 def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, banderas, recomendacion):
     """Guarda el análisis de hoy en Supabase"""
+
+    def to_int(v):
+        try: return int(float(v)) if v is not None else None
+        except: return None
+
+    def to_float(v):
+        try: return round(float(v), 2) if v is not None else None
+        except: return None
+
     # Calcular horas de sueño
     horas_sueno = None
-    if wellness_hoy.get("sleepSecs"):
-        horas_sueno = round(wellness_hoy["sleepSecs"] / 3600, 2)
-    elif wellness_hoy.get("sleepHours"):
-        horas_sueno = wellness_hoy["sleepHours"]
+    try:
+        if wellness_hoy.get("sleepSecs"):
+            horas_sueno = round(float(wellness_hoy["sleepSecs"]) / 3600, 2)
+        elif wellness_hoy.get("sleepHours"):
+            horas_sueno = round(float(wellness_hoy["sleepHours"]), 2)
+    except:
+        horas_sueno = None
 
-    # Limpiar actividades para no enviar datos gigantes
+    # Limpiar actividades
     actividades_limpias = []
     for a in actividades_hoy:
-        actividades_limpias.append({
-            "id": a.get("id"),
-            "name": a.get("name"),
-            "type": a.get("type"),
-            "duration_minutes": a.get("moving_time", 0) // 60,
-            "distance_km": round(a.get("distance", 0) / 1000, 2),
-            "tss": a.get("training_load"),
-            "avg_hr": a.get("average_heartrate")
-        })
+        try:
+            dur = to_int(a.get("moving_time", 0) // 60 if a.get("moving_time") else 0)
+            dist = to_float(a.get("distance", 0) / 1000 if a.get("distance") else 0)
+            actividades_limpias.append({
+                "id": str(a.get("id", "")),
+                "name": str(a.get("name", "")),
+                "type": str(a.get("type", "")),
+                "duration_minutes": dur,
+                "distance_km": dist,
+                "tss": to_float(a.get("training_load")),
+                "avg_hr": to_int(a.get("average_heartrate"))
+            })
+        except:
+            pass
 
     data = {
-        "fecha": fecha,
-        "hrv": wellness_hoy.get("hrv"),
-        "fc_reposo": wellness_hoy.get("restingHeartRate"),
+        "fecha": str(fecha),
+        "hrv": to_int(wellness_hoy.get("hrv")),
+        "fc_reposo": to_int(wellness_hoy.get("restingHeartRate")),
         "horas_sueno": horas_sueno,
-        "sleep_score": wellness_hoy.get("sleepScore"),
-        "ctl": wellness_hoy.get("ctl"),
-        "atl": wellness_hoy.get("atl"),
-        "tsb": wellness_hoy.get("tsb"),
-        "actividades_hoy": actividades_limpias,  # JSONB directo, no string
-        "tss_dia": int(tss_dia) if tss_dia else None,
-        "mensaje_telegram": mensaje,
-        "banderas": banderas,  # JSONB directo, no string
-        "recomendacion": recomendacion
+        "sleep_score": to_int(wellness_hoy.get("sleepScore")),
+        "ctl": to_float(wellness_hoy.get("ctl")),
+        "atl": to_float(wellness_hoy.get("atl")),
+        "tsb": to_float(wellness_hoy.get("tsb")),
+        "actividades_hoy": actividades_limpias,
+        "tss_dia": to_int(tss_dia),
+        "mensaje_telegram": str(mensaje),
+        "banderas": banderas if isinstance(banderas, list) else [],
+        "recomendacion": str(recomendacion) if recomendacion else ""
     }
-    # Eliminar nulos para no sobreescribir con null
+    # Eliminar nulos
     data = {k: v for k, v in data.items() if v is not None}
+    print(f"   DEBUG campos enviados: {list(data.keys())}")
     supabase_post("analisis_diarios", data)
 
 def actualizar_patron(categoria, descripcion, severidad="info"):
