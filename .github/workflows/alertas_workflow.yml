@@ -1,0 +1,45 @@
+name: Coach Triatlón - Alertas Proactivas
+
+on:
+  schedule:
+    # Cada 3 horas entre 6am y 10pm hora Santiago (UTC-4)
+    # 6am  Santiago = 10:00 UTC
+    # 9am  Santiago = 13:00 UTC
+    # 12pm Santiago = 16:00 UTC
+    # 3pm  Santiago = 19:00 UTC
+    # 6pm  Santiago = 22:00 UTC
+    # 9pm  Santiago = 01:00 UTC
+    - cron: '0 10 * * *'
+    - cron: '0 13 * * *'
+    - cron: '0 16 * * *'
+    - cron: '0 19 * * *'
+    - cron: '0 22 * * *'
+    - cron: '0 1  * * *'
+  workflow_dispatch:
+
+jobs:
+  check-alerts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests anthropic
+
+      - name: Verificar y enviar alertas
+        env:
+          INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python alertas.py
