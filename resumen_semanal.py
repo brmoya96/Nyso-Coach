@@ -131,7 +131,7 @@ def calcular_metricas(datos):
 
     for a in actividades:
         tipo = a.get("type", "")
-        dist_km = a.get("distance_km", 0) or 0
+        dist_km = (a.get("distance", 0) or 0) / 1000
         tiempo_s = a.get("moving_time", 0) or 0
         tss = a.get("tss", 0) or 0
 
@@ -230,7 +230,7 @@ def calcular_metricas(datos):
             "nombre": mejor.get("name", ""),
             "tipo": mejor.get("type", ""),
             "duracion_min": round((mejor.get("moving_time", 0) or 0) / 60),
-            "distancia_km": round(mejor.get("distance_km", 0) or 0, 1),
+            "distancia_km": round((mejor.get("distance", 0) or 0) / 1000, 1),
             "tss": mejor.get("tss"),
             "fc_media": mejor.get("average_heartrate"),
             "fecha": mejor.get("start_date_local", "")[:10],
