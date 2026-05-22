@@ -1,0 +1,35 @@
+name: Coach Triatlón - Resumen Semanal
+
+on:
+  schedule:
+    # Domingos 20:00 hora Santiago invierno (UTC-4) = lunes 00:00 UTC
+    # Si es verano chileno (Oct-Mar) cambiar a: '0 23 * * 0' (domingo 23:00 UTC)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  send-weekly-summary:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests anthropic
+
+      - name: Correr resumen semanal
+        env:
+          INTERVALS_ATHLETE_ID: ${{ secrets.INTERVALS_ATHLETE_ID }}
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python resumen_semanal.py
