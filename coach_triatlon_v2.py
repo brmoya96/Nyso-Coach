@@ -5,6 +5,8 @@ from anthropic import Anthropic
 import base64
 import json
 
+from recovery_calc import procesar_recovery, formatear_recovery_bloque
+
 # === CONFIGURACIÓN ===
 INTERVALS_ATHLETE_ID = os.environ["INTERVALS_ATHLETE_ID"]
 INTERVALS_API_KEY = os.environ["INTERVALS_API_KEY"]
@@ -136,6 +138,24 @@ def get_memoria():
     except:
         memoria["historia"] = []
 
+    # Recovery últimos 30 días
+    try:
+        memoria["recovery_30d"] = supabase_get(
+            "recovery_metrics",
+            "order=fecha.desc&limit=30"
+        )
+    except:
+        memoria["recovery_30d"] = []
+
+    # Recovery mes peak — marzo 2026 (referencia: promedio 81%)
+    try:
+        memoria["recovery_peak_marzo"] = supabase_get(
+            "recovery_metrics",
+            "fecha=gte.2026-03-01&fecha=lte.2026-03-31&order=fecha.asc"
+        )
+    except:
+        memoria["recovery_peak_marzo"] = []
+
     return memoria
 
 def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, banderas, recomendacion):
@@ -197,6 +217,37 @@ def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, ban
     print(f"   DEBUG campos enviados: {list(data.keys())}")
     supabase_post("analisis_diarios", data)
 
+def guardar_recovery(fecha, resultado):
+    """Guarda el Recovery Score de hoy en la tabla recovery_metrics de Supabase"""
+    if "error" in resultado:
+        return
+
+    def to_int(v):
+        try: return int(float(v)) if v is not None else None
+        except: return None
+
+    def to_float(v):
+        try: return round(float(v), 2) if v is not None else None
+        except: return None
+
+    data = {
+        "fecha": str(fecha),
+        "recovery_score": to_int(resultado.get("recovery_score")),
+        "recovery_color": str(resultado.get("recovery_color", "")),
+        "hrv_hoy": to_int(resultado.get("hrv_hoy")),
+        "hrv_baseline": to_float(resultado.get("hrv_baseline")),
+        "hrv_score": to_int(resultado.get("hrv_score")),
+        "fc_reposo_hoy": to_int(resultado.get("fc_reposo_hoy")),
+        "fc_reposo_baseline": to_float(resultado.get("fc_reposo_baseline")),
+        "fc_reposo_score": to_int(resultado.get("fc_reposo_score")),
+        "horas_sueno": to_float(resultado.get("horas_sueno")),
+        "sleep_score": to_int(resultado.get("sleep_score")),
+        "day_strain": to_float(resultado.get("day_strain")),
+    }
+    data = {k: v for k, v in data.items() if v is not None}
+    supabase_post("recovery_metrics", data)
+
+
 def actualizar_patron(categoria, descripcion, severidad="info"):
     """Crea o actualiza un patrón detectado"""
     today = datetime.now().strftime("%Y-%m-%d")
@@ -229,12 +280,13 @@ def actualizar_patron(categoria, descripcion, severidad="info"):
 
 # === ANÁLISIS CON CLAUDE ===
 
-def analizar_con_claude(wellness_14d, activities_7d, events, memoria):
-    """Llama a Claude con datos frescos + memoria histórica"""
+def analizar_con_claude(wellness_30d, activities_7d, events, memoria, recovery_resultado=None, recovery_bloque=""):
+    """Llama a Claude con datos frescos + recovery score + memoria histórica"""
 
     today = datetime.now().strftime("%A %d de %B %Y")
     today_str = datetime.now().strftime("%Y-%m-%d")
 
+    wellness_14d = wellness_30d[-14:] if len(wellness_30d) >= 14 else wellness_30d
     wellness_hoy = wellness_14d[-1] if wellness_14d else {}
     wellness_ayer = wellness_14d[-2] if len(wellness_14d) >= 2 else {}
 
@@ -244,12 +296,21 @@ def analizar_con_claude(wellness_14d, activities_7d, events, memoria):
     ]
     tss_dia = sum(a.get("training_load", 0) or 0 for a in actividades_hoy)
 
-    # Calcular promedios históricos desde memoria
+    # Promedios históricos desde memoria
     analisis_previos = memoria.get("analisis_recientes", [])
     hrv_historico = [a["hrv"] for a in analisis_previos if a.get("hrv")]
     sueno_historico = [a["horas_sueno"] for a in analisis_previos if a.get("horas_sueno")]
     hrv_promedio = round(sum(hrv_historico) / len(hrv_historico), 1) if hrv_historico else "sin datos"
     sueno_promedio = round(sum(sueno_historico) / len(sueno_historico), 1) if sueno_historico else "sin datos"
+
+    # Recovery promedio últimos 7 días para contexto de Claude
+    recovery_30d = memoria.get("recovery_30d", [])
+    recovery_7d_scores = [
+        r.get("recovery_score") for r in
+        sorted(recovery_30d, key=lambda x: x.get("fecha", ""), reverse=True)[:7]
+        if r.get("recovery_score") is not None
+    ]
+    recovery_7d_avg = round(sum(recovery_7d_scores) / len(recovery_7d_scores)) if recovery_7d_scores else None
 
     prompt = f"""Eres un coach de triatlón experto con memoria de este atleta. Analiza los datos frescos de hoy junto con el historial completo.
 
@@ -271,6 +332,9 @@ FECHA HOY: {today}
 ### Próximas carreras (60 días):
 {json.dumps(events, indent=2)}
 
+### Recovery Score de hoy (pre-calculado — inserta este bloque literalmente en la sección Recovery):
+{recovery_bloque if recovery_bloque else "Sin datos de recovery disponibles"}
+
 ## MEMORIA HISTÓRICA (lo que has observado antes de este atleta)
 
 ### Perfil del atleta:
@@ -288,9 +352,16 @@ FECHA HOY: {today}
 ### Historia del atleta (contexto profundo):
 {json.dumps(memoria.get("historia", []), indent=2)}
 
+### Recovery últimos 30 días:
+{json.dumps(memoria.get("recovery_30d", []), indent=2)}
+
+### Recovery mes peak — marzo 2026 (referencia: promedio 81%):
+{json.dumps(memoria.get("recovery_peak_marzo", []), indent=2)}
+
 ### Promedios históricos calculados:
 - HRV promedio histórico: {hrv_promedio}
 - Sueño promedio histórico: {sueno_promedio}h
+- Recovery promedio últimos 7 días: {recovery_7d_avg}% (referencia: marzo pico 81%)
 
 ## INSTRUCCIONES
 
@@ -298,18 +369,23 @@ Genera DOS cosas:
 
 ### PARTE 1: Mensaje para Telegram
 Formato Markdown de Telegram (* para negrita, _ para cursiva).
-Máximo 400 palabras. Secciones:
+Máximo 450 palabras. Secciones:
 
 1. Saludo con fecha
-2. Sueño — horas, score, comparación con su promedio histórico ({sueno_promedio}h)
-3. HRV y FC reposo — valor hoy vs promedio histórico ({hrv_promedio}), tendencia últimos 5 días
-4. Forma actual — CTL/ATL/TSB, qué significa HOY para él
-5. Recomendación de HOY — concreta y específica (ej: "Z2 45 min máximo", no "entrena suave")
-6. Banderas — máximo 3, solo las importantes. Menciona si son patrones repetidos (ej: "tercera semana con HRV bajo")
-7. Próxima carrera — si hay una, días que faltan y una frase de contexto
-8. Frase final — corta, auténtica, no cursi
+2. Recovery Score — inserta el bloque pre-calculado tal como viene en "Recovery Score de hoy". No lo reformatees.
+3. Forma actual — CTL/ATL/TSB, qué significa HOY para él
+4. Recomendación de HOY — concreta y específica (ej: "Z2 45 min máximo", no "entrena suave")
+5. Banderas — máximo 3, solo las importantes. Menciona si son patrones repetidos
+6. Próxima carrera — si hay una, días que faltan y una frase de contexto
+7. Frase final — corta, auténtica, no cursi
 
-Reglas: usa datos reales, compara siempre con histórico cuando tengas datos, sé directo.
+Reglas especiales Recovery:
+- Si Recovery <50% por 3+ días consecutivos: el bloque ya incluye la alerta ⚠️, refuérzala mencionando qué acción concreta tomar HOY (sueño, hidratación con sodio, reducir cafeína post-2pm, cena con carbohidratos)
+- Si Recovery >70% por primera vez en 5+ días: el bloque ya incluye la celebración 🎉, úsala para validar que es buen día para calidad
+- FC reposo óptima histórica del atleta: ~49 bpm | HRV óptimo histórico: ~55ms (logrado en marzo 2026)
+- Cuando el recovery difiere mucho del promedio de marzo (81%), mencionarlo como referencia motivacional, no como crítica
+
+Reglas generales: usa datos reales, compara siempre con histórico cuando tengas datos, sé directo.
 
 ### PARTE 2: JSON de metadata (para guardar en base de datos)
 Responde con este JSON exacto al final, después del mensaje, separado por ---JSON---:
@@ -375,14 +451,15 @@ def send_telegram(message):
 
 def main():
     today_str = datetime.now().strftime("%Y-%m-%d")
+    yesterday_str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     print(f"Coach Triatlón - {today_str}")
     print("="*40)
 
     print("1. Leyendo datos de Intervals.icu...")
-    wellness_14d = get_wellness(days=14)
+    wellness_30d = get_wellness(days=30)
     activities_7d = get_activities(days=7)
     events = get_events_next_60_days()
-    print(f"   ✓ Wellness: {len(wellness_14d)} días")
+    print(f"   ✓ Wellness: {len(wellness_30d)} días")
     print(f"   ✓ Actividades: {len(activities_7d)}")
     print(f"   ✓ Eventos próximos: {len(events)}")
 
@@ -393,10 +470,24 @@ def main():
     print(f"   ✓ Perfil: {len(memoria['perfil'])} campos")
     print(f"   ✓ Carreras: {len(memoria['carreras_recientes'])}")
     print(f"   ✓ Historia: {len(memoria['historia'])} entradas")
+    print(f"   ✓ Recovery histórico: {len(memoria['recovery_30d'])} días")
+
+    print("2b. Calculando Recovery Score...")
+    actividades_ayer = [
+        a for a in activities_7d
+        if a.get("start_date_local", "").startswith(yesterday_str)
+    ]
+    recovery_resultado = procesar_recovery(wellness_30d, actividades_ayer, memoria["perfil"])
+    recovery_bloque = formatear_recovery_bloque(
+        recovery_resultado,
+        recovery_30d=memoria.get("recovery_30d", []),
+        recovery_marzo=memoria.get("recovery_peak_marzo", [])
+    )
+    print(f"   ✓ Recovery: {recovery_resultado.get('recovery_score', '?')}% {recovery_resultado.get('color_emoji', '')}")
 
     print("3. Analizando con Claude...")
     mensaje, metadata, actividades_hoy, tss_dia, wellness_hoy = analizar_con_claude(
-        wellness_14d, activities_7d, events, memoria
+        wellness_30d, activities_7d, events, memoria, recovery_resultado, recovery_bloque
     )
     print(f"   ✓ Mensaje generado ({len(mensaje)} chars)")
     print(f"   ✓ Banderas: {metadata.get('banderas', [])}")
@@ -420,6 +511,12 @@ def main():
         print("   ✓ Análisis guardado en base de datos")
     except Exception as e:
         print(f"   ⚠ Error guardando análisis: {e}")
+
+    try:
+        guardar_recovery(today_str, recovery_resultado)
+        print("   ✓ Recovery guardado en base de datos")
+    except Exception as e:
+        print(f"   ⚠ Error guardando recovery: {e}")
 
     # Guardar patrones nuevos detectados
     for patron in metadata.get("patrones_nuevos", []):
