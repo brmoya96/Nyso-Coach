@@ -156,6 +156,24 @@ def get_memoria():
     except:
         memoria["recovery_peak_marzo"] = []
 
+    # Últimos 3 exámenes de sangre
+    try:
+        memoria["examenes_sangre"] = supabase_get(
+            "examenes_sangre",
+            "order=fecha.desc&limit=3"
+        )
+    except:
+        memoria["examenes_sangre"] = []
+
+    # Últimos 5 tests de rendimiento
+    try:
+        memoria["tests_rendimiento"] = supabase_get(
+            "tests_rendimiento",
+            "order=fecha.desc&limit=5"
+        )
+    except:
+        memoria["tests_rendimiento"] = []
+
     return memoria
 
 def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, banderas, recomendacion):
@@ -358,6 +376,12 @@ FECHA HOY: {today}
 ### Recovery mes peak — marzo 2026 (referencia: promedio 81%):
 {json.dumps(memoria.get("recovery_peak_marzo", []), indent=2)}
 
+## EXÁMENES DE SANGRE (últimos registros)
+{json.dumps(memoria.get("examenes_sangre", []), indent=2)}
+
+## TESTS DE RENDIMIENTO (lactato, FTP, etc)
+{json.dumps(memoria.get("tests_rendimiento", []), indent=2)}
+
 ### Promedios históricos calculados:
 - HRV promedio histórico: {hrv_promedio}
 - Sueño promedio histórico: {sueno_promedio}h
@@ -384,6 +408,12 @@ Reglas especiales Recovery:
 - Si Recovery >70% por primera vez en 5+ días: el bloque ya incluye la celebración 🎉, úsala para validar que es buen día para calidad
 - FC reposo óptima histórica del atleta: ~49 bpm | HRV óptimo histórico: ~55ms (logrado en marzo 2026)
 - Cuando el recovery difiere mucho del promedio de marzo (81%), mencionarlo como referencia motivacional, no como crítica
+
+Reglas especiales Exámenes de sangre y Tests:
+- Si han pasado más de 4 meses desde el último examen de sangre, recuérdalo como bandera
+- Si la testosterona del último examen fue menor a 450 ng/dL, es señal de estrés fisiológico alto — menciónalo con contexto de carga de entrenamiento
+- Si la vitamina D fue menor a 35, mencionar que puede seguir cayendo en invierno y recomendar suplementación
+- Al analizar runs, comparar FC y pace contra las zonas del test de lactato de marzo 2026: OBLA 3:32/km, umbral aeróbico 3:54/km, Z2 tope 4:30/km
 
 Reglas generales: usa datos reales, compara siempre con histórico cuando tengas datos, sé directo.
 
@@ -471,6 +501,8 @@ def main():
     print(f"   ✓ Carreras: {len(memoria['carreras_recientes'])}")
     print(f"   ✓ Historia: {len(memoria['historia'])} entradas")
     print(f"   ✓ Recovery histórico: {len(memoria['recovery_30d'])} días")
+    print(f"   ✓ Exámenes sangre: {len(memoria['examenes_sangre'])} registros")
+    print(f"   ✓ Tests rendimiento: {len(memoria['tests_rendimiento'])} registros")
 
     print("2b. Calculando Recovery Score...")
     actividades_ayer = [
