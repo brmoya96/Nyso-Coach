@@ -131,9 +131,9 @@ def calcular_metricas(datos):
 
     for a in actividades:
         tipo = a.get("type", "")
-        dist_km = (a.get("distance", 0) or 0) / 1000
+        dist_km = a.get("distance_km", 0) or 0
         tiempo_s = a.get("moving_time", 0) or 0
-        tss = a.get("training_load", 0) or 0
+        tss = a.get("tss", 0) or 0
 
         horas_total += tiempo_s / 3600
         tss_total += tss
@@ -225,13 +225,13 @@ def calcular_metricas(datos):
     # Sesión clave: mayor TSS
     sesion_clave = None
     if actividades:
-        mejor = max(actividades, key=lambda a: a.get("training_load", 0) or 0)
+        mejor = max(actividades, key=lambda a: a.get("tss", 0) or 0)
         sesion_clave = {
             "nombre": mejor.get("name", ""),
             "tipo": mejor.get("type", ""),
             "duracion_min": round((mejor.get("moving_time", 0) or 0) / 60),
-            "distancia_km": round((mejor.get("distance", 0) or 0) / 1000, 1),
-            "tss": mejor.get("training_load"),
+            "distancia_km": round(mejor.get("distance_km", 0) or 0, 1),
+            "tss": mejor.get("tss"),
             "fc_media": mejor.get("average_heartrate"),
             "fecha": mejor.get("start_date_local", "")[:10],
         }
