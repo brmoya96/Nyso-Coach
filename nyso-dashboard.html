@@ -11,245 +11,193 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;600&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0a0a12; --card:#13131f; --card2:#1a1a2e; --border:#1e1e2e;
-  --txt:#e0e0f0; --muted:#888; --dim:#555; --na:#333;
-  --green:#4ade80; --yellow:#facc15; --red:#f87171;
-  --blue:#60a5fa; --purple:#a78bfa; --indigo:#818cf8; --orange:#fb923c;
-}
-* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-body { background:var(--bg); color:var(--txt); font-family:'DM Sans',sans-serif; min-height:100vh; padding-bottom:50px; }
-
-/* HEADER */
-.header { background:linear-gradient(180deg,#0f0f1e,var(--bg)); border-bottom:1px solid var(--border); padding:18px 18px 14px; }
-.tag { font-size:10px; color:var(--dim); letter-spacing:.12em; text-transform:uppercase; font-family:'DM Mono',monospace; }
-h1 { font-size:21px; font-weight:700; letter-spacing:-.02em; margin-top:3px; }
-.subtitle { font-size:11px; color:var(--dim); margin-top:3px; }
-
-/* LOADING */
-.loading { text-align:center; padding:60px 20px; color:var(--dim); font-size:14px; }
-.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--purple); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* CARDS */
-.card { background:linear-gradient(135deg,var(--card),var(--card2)); border-radius:16px; padding:16px 18px; border:1px solid var(--border); margin:12px 14px 0; }
-.card-title { font-size:10px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; font-family:'DM Mono',monospace; margin-bottom:12px; }
-
-/* HERO */
-.hero { display:flex; align-items:center; gap:16px; margin:14px 14px 0; background:linear-gradient(135deg,var(--card),var(--card2)); border-radius:20px; padding:18px; border:1px solid var(--border); }
-.hero-info { flex:1; min-width:0; }
-.hero-title { font-size:10px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; font-family:'DM Mono',monospace; }
-.hero-state { font-size:17px; font-weight:700; margin-top:4px; }
-.hero-comps { font-size:11px; color:var(--muted); margin-top:6px; line-height:2; }
-.hero-comps b { font-family:'DM Mono',monospace; }
-.source-tag { font-size:10px; color:var(--dim); margin-top:5px; }
-
-/* RING */
-.ring-wrap { position:relative; flex-shrink:0; }
-.ring-svg { transform:rotate(-90deg); display:block; }
-.ring-bg { fill:none; stroke:var(--border); }
-.ring-arc { fill:none; stroke-linecap:round; transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1); }
-.ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.ring-num { font-size:28px; font-weight:800; font-family:'DM Mono',monospace; line-height:1; }
-.ring-pct { font-size:11px; color:var(--dim); }
-.ring-mini-num { font-size:15px; font-weight:700; font-family:'DM Mono',monospace; }
-
-/* METRICS */
-.metric-label { font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; font-family:'DM Mono',monospace; }
-.metric-val { font-size:26px; font-weight:700; font-family:'DM Mono',monospace; line-height:1.15; }
-.metric-base { font-size:10px; color:var(--dim); margin-top:1px; }
-.bar-track { height:7px; background:var(--border); border-radius:4px; overflow:hidden; margin:7px 0; }
-.bar-fill { height:100%; border-radius:4px; transition:width 1.2s ease; }
-.insight { font-size:11px; color:var(--muted); line-height:1.55; padding:8px 11px; background:var(--bg); border-radius:8px; border-left:3px solid var(--border); margin-top:5px; }
-
-/* SLEEP */
-.sleep-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
-.sleep-lbl { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; width:55px; text-align:right; flex-shrink:0; }
-.sleep-track { flex:1; height:7px; background:var(--border); border-radius:4px; overflow:hidden; }
-.sleep-bar { height:100%; border-radius:4px; }
-.sleep-val { font-size:10px; font-family:'DM Mono',monospace; width:42px; flex-shrink:0; }
-
-/* GRID */
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 14px 0; }
-.mini-card { background:var(--card); border-radius:14px; padding:13px 14px; border:1px solid var(--border); }
-.mini-label { font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; font-family:'DM Mono',monospace; }
-.mini-val { font-size:22px; font-weight:700; font-family:'DM Mono',monospace; margin-top:3px; }
-.mini-insight { font-size:10px; color:var(--muted); margin-top:5px; line-height:1.4; }
-
-/* CTL */
-.ctl-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
-.ctl-item { text-align:center; }
-.ctl-lbl { font-size:9px; color:var(--dim); text-transform:uppercase; font-family:'DM Mono',monospace; }
-.ctl-val { font-size:24px; font-weight:800; font-family:'DM Mono',monospace; margin-top:2px; }
-.ctl-sub { font-size:9px; color:var(--dim); margin-top:1px; }
-
-/* CHART */
-.chart-area { display:flex; align-items:flex-end; gap:5px; height:64px; margin-top:4px; }
-.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; height:100%; justify-content:flex-end; }
-.bar-col-fill { width:100%; border-radius:3px 3px 0 0; min-height:4px; }
-.bar-col-lbl { font-size:8px; color:var(--dim); }
-
-/* HAWAII */
-.hawaii { text-align:center; padding:16px; background:linear-gradient(135deg,var(--card),var(--card2)); border-radius:14px; border:1px solid #7c3aed33; margin:12px 14px 0; }
-.hawaii-num { font-size:40px; font-weight:800; color:var(--purple); font-family:'DM Mono',monospace; }
-.hawaii-lbl { font-size:11px; color:var(--dim); margin-top:2px; }
-
-/* BUTTON */
-.refresh { display:block; margin:14px 14px 0; width:calc(100% - 28px); background:linear-gradient(135deg,#7c3aed,#4f46e5); border:none; border-radius:12px; padding:14px; color:#fff; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; }
-
-.footer { font-size:9px; color:#222; text-align:center; margin-top:14px; font-family:'DM Mono',monospace; }
-.na { color:var(--na); }
-
-/* colors */
-.c-green { color:var(--green); } .c-yellow { color:var(--yellow); } .c-red { color:var(--red); }
-.c-blue { color:var(--blue); } .c-purple { color:var(--purple); } .c-orange { color:var(--orange); }
-.b-green { border-left-color:var(--green) !important; }
-.b-blue  { border-left-color:var(--blue)  !important; }
-.b-purple{ border-left-color:var(--purple)!important; }
-.b-yellow{ border-left-color:var(--yellow)!important; }
+:root{--bg:#0a0a12;--card:#13131f;--card2:#1a1a2e;--border:#1e1e2e;--txt:#e0e0f0;--muted:#888;--dim:#555;--na:#333;--green:#4ade80;--yellow:#facc15;--red:#f87171;--blue:#60a5fa;--purple:#a78bfa;--orange:#fb923c}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:50px}
+.header{background:linear-gradient(180deg,#0f0f1e,var(--bg));border-bottom:1px solid var(--border);padding:18px 18px 14px}
+.tag{font-size:10px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-family:'DM Mono',monospace}
+h1{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-top:3px}
+.subtitle{font-size:11px;color:var(--dim);margin-top:3px}
+.stale{display:inline-block;background:#7c3aed22;color:var(--purple);font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-family:'DM Mono',monospace}
+.loading{text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:16px;padding:16px 18px;border:1px solid var(--border);margin:12px 14px 0}
+.card-title{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:12px}
+.hero{display:flex;align-items:center;gap:16px;margin:14px 14px 0;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:20px;padding:18px;border:1px solid var(--border)}
+.hero-info{flex:1;min-width:0}
+.hero-title{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace}
+.hero-state{font-size:17px;font-weight:700;margin-top:4px}
+.hero-comps{font-size:11px;color:var(--muted);margin-top:6px;line-height:2}
+.hero-comps b{font-family:'DM Mono',monospace}
+.source-tag{font-size:10px;color:var(--dim);margin-top:5px}
+.ring-wrap{position:relative;flex-shrink:0}
+.ring-svg{transform:rotate(-90deg);display:block}
+.ring-bg{fill:none;stroke:var(--border)}
+.ring-arc{fill:none;stroke-linecap:round;transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1)}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-size:28px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.ring-pct{font-size:11px;color:var(--dim)}
+.ring-mini-num{font-size:15px;font-weight:700;font-family:'DM Mono',monospace}
+.metric-label{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace}
+.metric-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;line-height:1.15}
+.metric-base{font-size:10px;color:var(--dim);margin-top:1px}
+.bar-track{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin:7px 0}
+.bar-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
+.insight{font-size:11px;color:var(--muted);line-height:1.55;padding:8px 11px;background:var(--bg);border-radius:8px;border-left:3px solid var(--border);margin-top:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 14px 0}
+.mini-card{background:var(--card);border-radius:14px;padding:13px 14px;border:1px solid var(--border)}
+.mini-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace}
+.mini-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;margin-top:3px}
+.mini-insight{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.4}
+.ctl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ctl-item{text-align:center}
+.ctl-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;font-family:'DM Mono',monospace}
+.ctl-val{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;margin-top:2px}
+.ctl-sub{font-size:9px;color:var(--dim);margin-top:1px}
+.chart-area{display:flex;align-items:flex-end;gap:5px;height:64px;margin-top:4px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bar-col-fill{width:100%;border-radius:3px 3px 0 0;min-height:4px}
+.bar-col-lbl{font-size:8px;color:var(--dim)}
+.hawaii{text-align:center;padding:16px;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid #7c3aed33;margin:12px 14px 0}
+.hawaii-num{font-size:40px;font-weight:800;color:var(--purple);font-family:'DM Mono',monospace}
+.hawaii-lbl{font-size:11px;color:var(--dim);margin-top:2px}
+.refresh{display:block;margin:14px 14px 0;width:calc(100% - 28px);background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;border-radius:12px;padding:14px;color:#fff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+.footer{font-size:9px;color:#222;text-align:center;margin-top:14px;font-family:'DM Mono',monospace}
+.na{color:var(--na)}
+.c-green{color:var(--green)}.c-yellow{color:var(--yellow)}.c-red{color:var(--red)}
+.c-blue{color:var(--blue)}.c-purple{color:var(--purple)}.c-orange{color:var(--orange)}
+.b-green{border-left-color:var(--green)!important}.b-blue{border-left-color:var(--blue)!important}
+.b-purple{border-left-color:var(--purple)!important}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="tag">⚡ NYSO · COACH TRIATLÓN</div>
   <h1>Recovery Dashboard</h1>
   <div class="subtitle" id="subtitle">Cargando datos...</div>
 </div>
-
-<div id="app">
-  <div class="loading">
-    <div class="spinner"></div>
-    Conectando con Intervals.icu y Supabase...
-  </div>
-</div>
-
+<div id="app"><div class="loading"><div class="spinner"></div>Conectando con Intervals.icu...</div></div>
 <script>
 const SUPA_URL  = 'https://ooziprpnyoorifmemser.supabase.co';
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemlwcnBueW9vcmlmbWVtc2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTQ5MjksImV4cCI6MjA5NDE3MDkyOX0.Lrn4NkZYhhDNaJ0mwqhobp6xpNCRKe7--oZGO25VWMw';
+const H = {'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
 
-const headers = { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON };
-
-async function query(table, params='') {
-  const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`, { headers });
-  if (!r.ok) throw new Error(`${table}: ${r.status}`);
+async function query(table,params=''){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`,{headers:H});
+  if(!r.ok)throw new Error(`${table}: ${r.status}`);
   return r.json();
 }
 
-function n(v) { const x = Number(v); return (isNaN(x) || x === 0) ? null : x; }
-function fmt(v, s='') { return v !== null ? `${v}${s}` : '<span class="na">—</span>'; }
-function fmtH(min) {
-  if (!min) return '<span class="na">—</span>';
-  return `${Math.floor(min/60)}h ${Math.round(min%60)}m`;
-}
-function rcClass(c) { return c==='verde'?'green':c==='amarillo'?'yellow':'red'; }
-function rcEmoji(c) { return c==='verde'?'🟢':c==='amarillo'?'🟡':'🔴'; }
+function n(v){const x=Number(v);return(isNaN(x)||x===0)?null:x}
+function fmt(v,s=''){return v!==null?`${v}${s}`:'<span class="na">—</span>'}
+function fmtH(min){if(!min)return'<span class="na">—</span>';return`${Math.floor(min/60)}h ${Math.round(min%60)}m`}
+function rcClass(c){return c==='verde'?'green':c==='amarillo'?'yellow':'red'}
+function rcEmoji(c){return c==='verde'?'🟢':c==='amarillo'?'🟡':'🔴'}
+function rcColor(c){return c==='verde'?'var(--green)':c==='amarillo'?'var(--yellow)':'var(--red)'}
 
-function svgRing(pct, color, size, sw, innerHtml) {
-  const r = (size-sw)/2, c = 2*Math.PI*r;
-  const f = (Math.min(pct||0,100)/100)*c;
-  return `<div class="ring-wrap" style="width:${size}px;height:${size}px">
+function svgRing(pct,color,size,sw,inner){
+  const r=(size-sw)/2,c=2*Math.PI*r,f=(Math.min(pct||0,100)/100)*c;
+  return`<div class="ring-wrap" style="width:${size}px;height:${size}px">
     <svg class="ring-svg" width="${size}" height="${size}">
       <circle class="ring-bg" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"/>
       <circle class="ring-arc" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"
         stroke="${color}" stroke-dasharray="${f.toFixed(1)} ${c.toFixed(1)}"/>
     </svg>
-    <div class="ring-inner">${innerHtml}</div>
-  </div>`;
+    <div class="ring-inner">${inner}</div></div>`;
+}
+function bar(pct,color){
+  return`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct||0)}%;background:${color}"></div></div>`;
+}
+function insightHRV(v,b){
+  if(!v)return'Intervals aún no sincronizó — disponible después de las 9am.';
+  const d=((v-b)/b)*100;
+  if(d>=10)return`↑ ${d.toFixed(0)}% sobre baseline. SNA muy recuperado. Día para cargar.`;
+  if(d>=0)return`En línea con baseline. Recuperación normal.`;
+  if(d>=-10)return`↓ ${Math.abs(d).toFixed(0)}% bajo baseline. Bajo estrés. Máximo Z2.`;
+  return`↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA estresado. Descansa.`;
+}
+function insightRHR(v,b){
+  if(!v)return'Intervals aún no sincronizó — disponible después de las 9am.';
+  const d=v-b;
+  if(d<=-3)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón eficiente. Positivo.`;
+  if(d<=2)return`Normal (±${Math.abs(d).toFixed(0)} bpm de base). Sin alarmas.`;
+  if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga.`;
+  return`+${d.toFixed(0)} bpm sobre base. Estrés fisiológico.`;
+}
+function insightSleep(v){
+  if(!v)return'Sin datos de sueño disponibles aún.';
+  if(v>=85)return'Excelente. Recovery maximizado.';
+  if(v>=70)return'Bueno. Margen en fases profundas.';
+  if(v>=55)return'Regular. Acuéstate 30 min antes esta noche.';
+  return'Insuficiente. Oscuridad, 18°C, sin pantallas 1h antes.';
+}
+function insightBB(v){
+  if(!v)return'Sin dato — Body Battery no disponible en esta integración.';
+  if(v>=75)return'Energía alta. Buena ventana para intensidad.';
+  if(v>=50)return'Energía moderada. Entrena con mesura.';
+  if(v>=25)return'Energía baja. Solo Z1-Z2.';
+  return'Energía muy baja. El cuerpo pide recuperación.';
 }
 
-function barHTML(pct, color) {
-  return `<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct||0)}%;background:${color}"></div></div>`;
-}
+async function render(){
+  const today=new Date().toISOString().slice(0,10);
+  const diffDays=Math.round((new Date('2026-10-10').getTime()-Date.now())/86400000);
 
-function insightHRV(v, b) {
-  if (!v) return 'Sin dato — verifica sincronización Garmin/Intervals.';
-  const d = ((v-b)/b)*100;
-  if (d >= 10)  return `↑ ${d.toFixed(0)}% sobre baseline. SNA muy recuperado. Día ideal para carga alta.`;
-  if (d >= 0)   return `En línea con baseline. Recuperación normal.`;
-  if (d >= -10) return `↓ ${Math.abs(d).toFixed(0)}% bajo baseline. Cuerpo aún bajo estrés. Máximo Z2 hoy.`;
-  return `↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA estresado. Descanso activo o reposo total.`;
-}
-function insightRHR(v, b) {
-  if (!v) return 'Sin dato de FC reposo.';
-  const d = v-b;
-  if (d <= -3) return `${Math.abs(d).toFixed(0)} bpm bajo base. Corazón muy eficiente. Señal positiva.`;
-  if (d <= 2)  return `Normal (±${Math.abs(d).toFixed(0)} bpm de base). Sin alarmas.`;
-  if (d <= 5)  return `+${d.toFixed(0)} bpm sobre base. Posible fatiga o deshidratación.`;
-  return `+${d.toFixed(0)} bpm sobre base. Señal de estrés fisiológico.`;
-}
-function insightSleep(v) {
-  if (!v) return 'Sin datos de sueño disponibles.';
-  if (v >= 85) return 'Excelente. Recovery maximizado para hoy.';
-  if (v >= 70) return 'Bueno. Pequeño margen en fases profundas.';
-  if (v >= 55) return 'Regular. Acuéstate 30 min antes esta noche.';
-  return 'Insuficiente. Oscuridad total, 18°C, sin pantallas 1h antes.';
-}
-function insightBB(v) {
-  if (!v) return 'Sin dato de Body Battery.';
-  if (v >= 75) return 'Energía alta. Buena ventana para intensidad.';
-  if (v >= 50) return 'Energía moderada. Entrena con mesura.';
-  if (v >= 25) return 'Energía baja. Solo Z1-Z2.';
-  return 'Energía muy baja. El cuerpo pide recuperación.';
-}
-
-async function render() {
-  const today = new Date().toISOString().slice(0,10);
-  const diffDays = Math.round((new Date('2026-10-10').getTime()-Date.now())/86400000);
-
-  document.getElementById('subtitle').textContent = `${today} · ${diffDays} días para Hawaii 🏝️`;
-
-  // Cargar datos en paralelo
-  const [rmRows, adRows, histRows] = await Promise.all([
-    query('recovery_metrics', `fecha=eq.${today}&limit=1`),
-    query('analisis_diarios', `fecha=eq.${today}&select=ctl,atl,tsb,tss_dia&limit=1`),
-    query('recovery_metrics', `order=fecha.desc&limit=10&select=fecha,recovery_score,recovery_color,hrv_hoy,fc_reposo_hoy,horas_sueno`)
+  // Cargar últimos 10 días con datos + analisis de hoy
+  const [rmAll, histRows, adRows] = await Promise.all([
+    query('recovery_metrics','order=fecha.desc&limit=10&select=*'),
+    query('recovery_metrics','order=fecha.desc&limit=10&select=fecha,recovery_score,recovery_color,hrv_hoy'),
+    query('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb&limit=1`)
   ]);
 
-  const rm   = rmRows[0]  || {};
-  const ad   = adRows[0]  || {};
-  const hist = histRows   || [];
+  // FALLBACK CORRECTO: buscar el día más reciente con HRV real
+  // Si hoy no tiene datos, usar ayer
+  const rm = rmAll.find(r=>n(r.hrv_hoy)!==null) || rmAll[0] || {};
+  const isToday = rm.fecha === today;
+  const ad = adRows[0] || {};
 
-  const rscore = n(rm.recovery_score) ?? 50;
-  const rc     = rm.recovery_color || 'amarillo';
-  const rcol   = rc==='verde'?'var(--green)':rc==='amarillo'?'var(--yellow)':'var(--red)';
-  const hrv_v  = n(rm.hrv_hoy);
-  const rhr_v  = n(rm.fc_reposo_hoy);
-  const hrv_b  = n(rm.hrv_baseline) ?? 43;
-  const rhr_b  = n(rm.fc_reposo_baseline) ?? 53;
-  const slp_h  = n(rm.horas_sueno);
-  const slp_p  = n(rm.sleep_perf_pct);
-  const slp_nd = n(rm.sleep_need_min);
-  const bb_v   = n(rm.body_battery);
-  const str_v  = n(rm.stress_avg);
-  const ctl    = ad.ctl  ? Number(ad.ctl).toFixed(0)  : null;
-  const atl    = ad.atl  ? Number(ad.atl).toFixed(0)  : null;
-  const tsb    = ad.tsb  ? Number(ad.tsb) : null;
-  const tsb_s  = tsb !== null ? `${tsb>=0?'+':''}${tsb.toFixed(1)}` : null;
+  // Badge si mostramos datos de ayer
+  const staleBadge = !isToday && rm.fecha
+    ? `<span class="stale">datos del ${rm.fecha.slice(5)} · sync a las 9am</span>`
+    : '';
+  document.getElementById('subtitle').innerHTML=`${today} · ${diffDays} días para Hawaii 🏝️ ${staleBadge}`;
 
-  // Gráfico
-  const maxScore = Math.max(...hist.map(h=>h.recovery_score||0), 1);
-  const bars = [...hist].reverse().map(h => {
-    const pct = Math.round(((h.recovery_score||0)/maxScore)*100);
-    const col = rc==='verde'?'var(--green)':h.recovery_color==='amarillo'?'var(--yellow)':'var(--red)';
-    const colFinal = h.recovery_color==='verde'?'var(--green)':h.recovery_color==='amarillo'?'var(--yellow)':'var(--red)';
-    return `<div class="bar-col">
-      <div class="bar-col-fill" style="height:${pct}%;background:${colFinal};opacity:.85"></div>
+  const rscore=n(rm.recovery_score)??50;
+  const rc=rm.recovery_color||'amarillo';
+  const rcol=rcColor(rc);
+  const hrv_v=n(rm.hrv_hoy);
+  const rhr_v=n(rm.fc_reposo_hoy);
+  const hrv_b=n(rm.hrv_baseline)??43;
+  const rhr_b=n(rm.fc_reposo_baseline)??53;
+  const slp_h=n(rm.horas_sueno);
+  const slp_p=n(rm.sleep_perf_pct);
+  const slp_nd=n(rm.sleep_need_min);
+  const resp_v=n(rm.resp_rate);
+  const ctl=ad.ctl?Number(ad.ctl).toFixed(0):null;
+  const atl=ad.atl?Number(ad.atl).toFixed(0):null;
+  const tsb=ad.tsb?Number(ad.tsb):null;
+  const tsb_s=tsb!==null?`${tsb>=0?'+':''}${tsb.toFixed(1)}`:null;
+
+  // Historial para gráfico
+  const maxScore=Math.max(...histRows.map(h=>h.recovery_score||0),1);
+  const bars=[...histRows].reverse().map(h=>{
+    const pct=Math.round(((h.recovery_score||0)/maxScore)*100);
+    const col=rcColor(h.recovery_color||'amarillo');
+    const active=h.fecha===rm.fecha;
+    return`<div class="bar-col">
+      <div class="bar-col-fill" style="height:${pct}%;background:${col};opacity:${active?1:.65};${active?`box-shadow:0 0 8px ${col}`:''}"></div>
       <span class="bar-col-lbl">${(h.fecha||'').slice(5)}</span>
     </div>`;
   }).join('');
 
-  // Rings
-  const heroRing = svgRing(rscore, rcol, 110, 12,
+  const heroRing=svgRing(rscore,rcol,110,12,
     `<span class="ring-num ${rcClass(rc)}">${rscore}</span><span class="ring-pct">%</span>`);
-  const sleepRing = slp_p !== null
-    ? svgRing(slp_p, 'var(--purple)', 72, 8,
-        `<span class="ring-mini-num c-purple">${Math.round(slp_p)}</span>`)
-    : '';
+  const sleepRing=slp_p!==null
+    ?svgRing(slp_p,'var(--purple)',72,8,`<span class="ring-mini-num c-purple">${Math.round(slp_p)}</span>`)
+    :'';
 
-  const strColor = str_v>60?'var(--red)':str_v>30?'var(--yellow)':'var(--green)';
-
-  document.getElementById('app').innerHTML = `
+  document.getElementById('app').innerHTML=`
 
 <!-- HERO -->
 <div class="hero" style="border-color:${rcol}33">
@@ -258,65 +206,54 @@ async function render() {
     <div class="hero-title">Recovery Score</div>
     <div class="hero-state c-${rcClass(rc)}">${rcEmoji(rc)} ${rc.charAt(0).toUpperCase()+rc.slice(1)}</div>
     <div class="hero-comps">
-      HRV <b class="c-green">${n(rm.hrv_score)??50}%</b> &nbsp;
-      FCR <b class="c-blue">${n(rm.fc_reposo_score)??50}%</b> &nbsp;
-      Sueño <b class="c-purple">${n(rm.sleep_score)??50}%</b>
+      HRV <b class="c-green">${n(rm.hrv_score)??'—'}%</b> &nbsp;
+      FCR <b class="c-blue">${n(rm.fc_reposo_score)??'—'}%</b> &nbsp;
+      Sueño <b class="c-purple">${n(rm.sleep_score)??'—'}%</b>
+      ${resp_v?`&nbsp; Resp <b style="color:var(--orange)">${n(rm.resp_score)??'—'}%</b>`:''}
     </div>
-    <div class="source-tag">Intervals.icu → Garmin</div>
+    <div class="source-tag">
+      Intervals.icu REST${resp_v?` · resp ${resp_v} brpm`:''}
+      ${!isToday?'<br>⚠ Mostrando último dato disponible':''}
+    </div>
   </div>
 </div>
 
 <!-- HRV -->
 <div class="card" style="border-color:var(--green)22">
   <div class="card-title">💓 HRV · Variabilidad Cardíaca</div>
-  <div class="metric-label">Anoche</div>
+  <div class="metric-label">Noche del ${(rm.fecha||today).slice(5)}</div>
   <div class="metric-val c-green">${fmt(hrv_v,' ms')}</div>
-  <div class="metric-base">Baseline 14d: ${hrv_b} ms · Histórico Benja: 43 ms</div>
-  ${barHTML(hrv_v ? Math.min(130, Math.round(hrv_v/hrv_b*100)) : 0, 'var(--green)')}
-  <div class="insight b-green">${insightHRV(hrv_v, hrv_b)}</div>
+  <div class="metric-base">Baseline 28d: ${hrv_b} ms · Histórico: 43 ms</div>
+  ${hrv_v?bar(Math.min(130,Math.round(hrv_v/hrv_b*100)),'var(--green)'):''}
+  <div class="insight b-green">${insightHRV(hrv_v,hrv_b)}</div>
 </div>
 
 <!-- FC Reposo -->
 <div class="card" style="border-color:var(--blue)22">
   <div class="card-title">❤️ FC Reposo · Intervals.icu</div>
-  <div class="metric-label">Hoy</div>
+  <div class="metric-label">Mañana del ${(rm.fecha||today).slice(5)}</div>
   <div class="metric-val c-blue">${fmt(rhr_v,' bpm')}</div>
-  <div class="metric-base">Baseline 14d: ${rhr_b} bpm · Histórico Benja: 53 bpm</div>
-  ${barHTML(rhr_v ? Math.min(100, Math.round(rhr_b/rhr_v*100)) : 0, 'var(--blue)')}
-  <div class="insight b-blue">${insightRHR(rhr_v, rhr_b)}</div>
+  <div class="metric-base">Baseline 28d: ${rhr_b} bpm · Histórico: 53 bpm</div>
+  ${rhr_v?bar(Math.min(100,Math.round(rhr_b/rhr_v*100)),'var(--blue)'):''}
+  <div class="insight b-blue">${insightRHR(rhr_v,rhr_b)}</div>
 </div>
 
 <!-- Sueño -->
 <div class="card" style="border-color:var(--purple)22">
-  <div class="card-title">🌙 Sueño · ${slp_h ? slp_h.toFixed(1)+'h dormido' : 'sin dato'}</div>
+  <div class="card-title">🌙 Sueño · ${slp_h?slp_h.toFixed(1)+'h dormido':'sincronizando...'}</div>
   <div style="display:flex;align-items:flex-start;gap:14px">
     ${sleepRing}
     <div style="flex:1">
       <div class="metric-label">Sleep Performance</div>
-      <div class="insight b-purple" style="margin-top:5px">${insightSleep(slp_p)}</div>
-      ${slp_nd ? `<div style="font-size:11px;color:var(--purple);margin-top:8px">🎯 Necesitas dormir esta noche: <b>${fmtH(slp_nd)}</b></div>` : ''}
+      <div class="metric-val c-purple" style="font-size:20px">${slp_p?Math.round(slp_p)+'%':'—'}</div>
+      <div class="insight b-purple" style="margin-top:6px">${insightSleep(slp_p)}</div>
+      ${slp_nd?`<div style="font-size:11px;color:var(--purple);margin-top:8px">🎯 Esta noche: <b>${fmtH(slp_nd)}</b></div>`:''}
     </div>
   </div>
 </div>
 
-<!-- Body Battery + Estrés -->
-<div class="grid2">
-  <div class="mini-card">
-    <div class="mini-label">⚡ Body Battery</div>
-    <div class="mini-val c-yellow">${fmt(bb_v,'/100')}</div>
-    ${barHTML(bb_v||0, 'var(--yellow)')}
-    <div class="mini-insight">${insightBB(bb_v)}</div>
-  </div>
-  <div class="mini-card">
-    <div class="mini-label">😰 Estrés ayer</div>
-    <div class="mini-val" style="color:${strColor}">${fmt(str_v,'/100')}</div>
-    ${barHTML(str_v||0, strColor)}
-    <div class="mini-insight">${str_v ? (str_v>60?'Alto. Impacta HRV y sueño.':str_v>30?'Moderado. Normal.':'Bajo. SNA recuperado.') : 'Sin dato.'}</div>
-  </div>
-</div>
-
 <!-- CTL/ATL/TSB -->
-${ctl||atl||tsb_s ? `
+${ctl||atl||tsb_s?`
 <div class="card" style="border-color:var(--blue)22">
   <div class="card-title">📊 Forma Actual · Intervals.icu</div>
   <div class="ctl-grid">
@@ -336,7 +273,7 @@ ${ctl||atl||tsb_s ? `
       <div class="ctl-sub">Forma</div>
     </div>
   </div>
-</div>` : ''}
+</div>`:''}
 
 <!-- Historial -->
 <div class="card">
@@ -351,16 +288,14 @@ ${ctl||atl||tsb_s ? `
 </div>
 
 <button class="refresh" onclick="location.reload()">↻ Actualizar datos</button>
-<div class="footer">Nyso Coach · Intervals.icu + algoritmos WHOOP · ${today}</div>
-`;
-}
+<div class="footer">Nyso Coach · algoritmos WHOOP · datos del ${rm.fecha||today}</div>
+`;}
 
-render().catch(e => {
-  document.getElementById('app').innerHTML = `
+render().catch(e=>{
+  document.getElementById('app').innerHTML=`
     <div style="padding:30px;color:var(--red);font-family:monospace;font-size:12px">
-      <b>Error cargando datos:</b><br><br>${e.message}<br><br>
-      Verifica conexión a internet y vuelve a intentar.
-      <br><br><button onclick="location.reload()" style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:14px;cursor:pointer">Reintentar</button>
+      <b>Error:</b><br><br>${e.message}<br><br>
+      <button onclick="location.reload()" style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:14px;cursor:pointer">Reintentar</button>
     </div>`;
 });
 </script>
