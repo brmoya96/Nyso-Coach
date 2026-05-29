@@ -3,301 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a12">
-<title>Nyso · Recovery</title>
+<meta name="theme-color" content="#080810">
+<title>Nyso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;600&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0a12;--card:#13131f;--card2:#1a1a2e;--border:#1e1e2e;--txt:#e0e0f0;--muted:#888;--dim:#555;--na:#333;--green:#4ade80;--yellow:#facc15;--red:#f87171;--blue:#60a5fa;--purple:#a78bfa;--orange:#fb923c}
+:root{--ink:#080810;--card:#141420;--edge:#1e1e30;--txt:#f0f0fa;--soft:#9090b0;--faint:#3a3a55;--na:#2a2a40;--teal:#00e5c8;--amber:#ffb830;--rose:#ff4d6d;--violet:#9b6dff;--blue:#4d9fff;--lime:#a3ff6d;--g:linear-gradient(135deg,#141420,#0e0e1a)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:50px}
-.header{background:linear-gradient(180deg,#0f0f1e,var(--bg));border-bottom:1px solid var(--border);padding:18px 18px 14px}
-.tag{font-size:10px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-family:'DM Mono',monospace}
-h1{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-top:3px}
-.subtitle{font-size:11px;color:var(--dim);margin-top:3px}
-.stale{display:inline-block;background:#7c3aed22;color:var(--purple);font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-family:'DM Mono',monospace}
-.loading{text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:16px;padding:16px 18px;border:1px solid var(--border);margin:12px 14px 0}
-.card-title{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:12px}
-.hero{display:flex;align-items:center;gap:16px;margin:14px 14px 0;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:20px;padding:18px;border:1px solid var(--border)}
-.hero-info{flex:1;min-width:0}
-.hero-title{font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace}
-.hero-state{font-size:17px;font-weight:700;margin-top:4px}
-.hero-comps{font-size:11px;color:var(--muted);margin-top:6px;line-height:2}
-.hero-comps b{font-family:'DM Mono',monospace}
-.source-tag{font-size:10px;color:var(--dim);margin-top:5px}
-.ring-wrap{position:relative;flex-shrink:0}
-.ring-svg{transform:rotate(-90deg);display:block}
-.ring-bg{fill:none;stroke:var(--border)}
-.ring-arc{fill:none;stroke-linecap:round;transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1)}
-.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-num{font-size:28px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
-.ring-pct{font-size:11px;color:var(--dim)}
-.ring-mini-num{font-size:15px;font-weight:700;font-family:'DM Mono',monospace}
-.metric-label{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace}
-.metric-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;line-height:1.15}
-.metric-base{font-size:10px;color:var(--dim);margin-top:1px}
-.bar-track{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin:7px 0}
-.bar-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
-.insight{font-size:11px;color:var(--muted);line-height:1.55;padding:8px 11px;background:var(--bg);border-radius:8px;border-left:3px solid var(--border);margin-top:5px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 14px 0}
-.mini-card{background:var(--card);border-radius:14px;padding:13px 14px;border:1px solid var(--border)}
-.mini-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace}
-.mini-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;margin-top:3px}
-.mini-insight{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.4}
-.ctl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.ctl-item{text-align:center}
-.ctl-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;font-family:'DM Mono',monospace}
-.ctl-val{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;margin-top:2px}
-.ctl-sub{font-size:9px;color:var(--dim);margin-top:1px}
-.chart-area{display:flex;align-items:flex-end;gap:5px;height:64px;margin-top:4px}
-.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
-.bar-col-fill{width:100%;border-radius:3px 3px 0 0;min-height:4px}
-.bar-col-lbl{font-size:8px;color:var(--dim)}
-.hawaii{text-align:center;padding:16px;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid #7c3aed33;margin:12px 14px 0}
-.hawaii-num{font-size:40px;font-weight:800;color:var(--purple);font-family:'DM Mono',monospace}
-.hawaii-lbl{font-size:11px;color:var(--dim);margin-top:2px}
-.refresh{display:block;margin:14px 14px 0;width:calc(100% - 28px);background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;border-radius:12px;padding:14px;color:#fff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
-.footer{font-size:9px;color:#222;text-align:center;margin-top:14px;font-family:'DM Mono',monospace}
+body{background:var(--ink);color:var(--txt);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--edge);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.bname{font-size:15px;font-weight:700;letter-spacing:.08em;font-family:'Space Mono',monospace}
+.bsub{font-size:9px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase}
+.sbtn{background:var(--edge);border:1px solid var(--faint);border-radius:8px;padding:7px 14px;color:var(--txt);font-size:11px;font-family:'Space Mono',monospace;cursor:pointer}
+.nav{display:flex;gap:2px;padding:12px 18px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--edge)}
+.nav::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:8px 14px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--soft);border-bottom:2px solid transparent;font-family:'Space Mono',monospace;margin-bottom:-1px;transition:color .15s}
+.tab.a{color:var(--teal);border-color:var(--teal)}
+.sec{display:none;padding-bottom:48px}
+.sec.a{display:block}
+.card{background:var(--g);border:1px solid var(--edge);border-radius:14px;padding:16px 18px;margin:12px 14px 0}
+.chd{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:'Space Mono',monospace;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.loader{text-align:center;padding:60px 20px;color:var(--soft);font-size:12px;font-family:'Space Mono',monospace}
+.spin{width:28px;height:28px;border:2px solid var(--edge);border-top-color:var(--teal);border-radius:50%;animation:rot .7s linear infinite;margin:0 auto 14px}
+@keyframes rot{to{transform:rotate(360deg)}}
+/* HERO */
+.hero{display:flex;align-items:center;gap:16px;margin:14px 14px 0;background:var(--g);border-radius:18px;padding:20px;border:1px solid var(--edge)}
+.rw{position:relative;flex-shrink:0}
+.rs{transform:rotate(-90deg);display:block}
+.rb{fill:none;stroke:var(--edge)}
+.ra{fill:none;stroke-linecap:round;transition:stroke-dasharray 1.4s cubic-bezier(.4,0,.2,1)}
+.ri{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rn{font-size:26px;font-weight:700;font-family:'Space Mono',monospace;line-height:1}
+.ru{font-size:9px;color:var(--soft)}
+.hr{flex:1;min-width:0}
+.hl{font-size:9px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace}
+.hs{font-size:18px;font-weight:700;margin-top:4px}
+.hp{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.pi{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 8px;border-radius:20px}
+.pg{background:#00e5c818;color:var(--teal);border:1px solid #00e5c835}
+.pb{background:#4d9fff18;color:var(--blue);border:1px solid #4d9fff35}
+.pv{background:#9b6dff18;color:var(--violet);border:1px solid #9b6dff35}
+.pa{background:#ffb83018;color:var(--amber);border:1px solid #ffb83035}
+.stale{font-size:9px;color:var(--amber);font-family:'Space Mono',monospace;margin-top:6px}
+/* METRICS */
+.ml{font-size:9px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;font-family:'Space Mono',monospace}
+.mv{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;margin-top:2px}
+.bar{height:5px;background:var(--edge);border-radius:3px;overflow:hidden;margin:6px 0}
+.bf{height:100%;border-radius:3px;transition:width 1.3s ease}
+.ins{font-size:11px;color:var(--soft);line-height:1.6;padding:9px 12px;background:rgba(0,0,0,.25);border-radius:9px;border-left:2px solid var(--faint);margin-top:6px}
+/* GRID */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ci{text-align:center;padding:10px 4px;background:rgba(0,0,0,.2);border-radius:10px}
+.cl{font-size:9px;color:var(--soft);text-transform:uppercase;font-family:'Space Mono',monospace}
+.cv{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:2px}
+.cs{font-size:9px;color:var(--faint);margin-top:1px}
+/* CHART */
+.cw{width:100%;overflow:hidden}
+.csv{width:100%;display:block}
+.cleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--soft);font-family:'Space Mono',monospace}
+.ld{width:10px;height:3px;border-radius:2px}
+.rbs{display:flex;gap:4px;flex-wrap:wrap}
+.rb2{padding:4px 9px;border-radius:6px;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;cursor:pointer;background:var(--edge);color:var(--soft);border:1px solid transparent}
+.rb2.a{background:#00e5c818;color:var(--teal);border-color:#00e5c840}
+/* TABLE */
+.vt{width:100%;border-collapse:collapse;font-size:11px;font-family:'Space Mono',monospace}
+.vt th{font-size:9px;color:var(--soft);letter-spacing:.08em;text-transform:uppercase;padding:6px 6px;border-bottom:1px solid var(--edge);text-align:left;font-weight:600}
+.vt td{padding:8px 6px;border-bottom:1px solid var(--edge);vertical-align:middle}
+.vt tr:last-child td{border-bottom:none}
+/* ACTIVITIES */
+.ai{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--edge)}
+.ai:last-child{border-bottom:none}
+.aic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.aib{flex:1;min-width:0}
+.ain{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aim{font-size:10px;color:var(--soft);margin-top:2px;font-family:'Space Mono',monospace}
+.ait{font-size:11px;font-weight:700;font-family:'Space Mono',monospace;color:var(--amber);flex-shrink:0}
+/* HAWAII */
+.hwb{text-align:center;padding:24px;background:var(--g);border-radius:14px;border:1px solid var(--edge);margin:12px 14px 0;position:relative;overflow:hidden}
+.hwb::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,#9b6dff18,transparent 65%);pointer-events:none}
+.hwn{font-size:52px;font-weight:700;color:var(--violet);font-family:'Space Mono',monospace;line-height:1}
+.hwl{font-size:10px;color:var(--soft);margin-top:4px;letter-spacing:.08em}
+.hwp{margin-top:14px;font-size:11px;color:var(--soft);line-height:1.9;padding:12px 14px;background:rgba(0,0,0,.3);border-radius:10px;text-align:left}
+/* ALERTS */
+.ab{margin:12px 14px 0;padding:12px 14px;border-radius:10px;border:1px solid;font-size:11px;line-height:1.5}
+.aw{background:#ffb83010;border-color:#ffb83040;color:var(--amber)}
+.ag{background:#00e5c810;border-color:#00e5c840;color:var(--teal)}
+.ar{background:#ff4d6d10;border-color:#ff4d6d40;color:var(--rose)}
+.ref{display:block;margin:16px 14px 0;width:calc(100% - 28px);background:var(--edge);border:1px solid var(--faint);border-radius:11px;padding:13px;color:var(--txt);font-size:12px;font-weight:600;font-family:'Space Mono',monospace;cursor:pointer;letter-spacing:.05em}
+.ft{font-size:9px;color:var(--faint);text-align:center;margin-top:14px;font-family:'Space Mono',monospace;padding:0 14px}
 .na{color:var(--na)}
-.c-green{color:var(--green)}.c-yellow{color:var(--yellow)}.c-red{color:var(--red)}
-.c-blue{color:var(--blue)}.c-purple{color:var(--purple)}.c-orange{color:var(--orange)}
-.b-green{border-left-color:var(--green)!important}.b-blue{border-left-color:var(--blue)!important}
-.b-purple{border-left-color:var(--purple)!important}
+.ct{color:var(--teal)}.ca{color:var(--amber)}.cr{color:var(--rose)}.cv2{color:var(--violet)}.cb{color:var(--blue)}.cl2{color:var(--lime)}.cs2{color:var(--soft)}
 </style>
 </head>
 <body>
-<div class="header">
-  <div class="tag">⚡ NYSO · COACH TRIATLÓN</div>
-  <h1>Recovery Dashboard</h1>
-  <div class="subtitle" id="subtitle">Cargando datos...</div>
+<div class="topbar">
+  <div class="brand"><div class="dot"></div><div><div class="bname">NYSO</div><div class="bsub">Coach Triatlón</div></div></div>
+  <button class="sbtn" id="sb" onclick="loadAll()">↻ SYNC</button>
 </div>
-<div id="app"><div class="loading"><div class="spinner"></div>Conectando con Intervals.icu...</div></div>
+<div class="nav" id="nav">
+  <div class="tab a" onclick="show('recovery')">Recovery</div>
+  <div class="tab" onclick="show('fitness')">Fitness</div>
+  <div class="tab" onclick="show('volume')">Volumen</div>
+  <div class="tab" onclick="show('acts')">Sesiones</div>
+  <div class="tab" onclick="show('hawaii')">Hawaii</div>
+</div>
+<div id="recovery" class="sec a"><div id="rc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+<div id="fitness"  class="sec"><div id="fc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+<div id="volume"   class="sec"><div id="vc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+<div id="acts"     class="sec"><div id="ac"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+<div id="hawaii"   class="sec"><div id="hc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+
 <script>
-const SUPA_URL  = 'https://ooziprpnyoorifmemser.supabase.co';
-const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemlwcnBueW9vcmlmbWVtc2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTQ5MjksImV4cCI6MjA5NDE3MDkyOX0.Lrn4NkZYhhDNaJ0mwqhobp6xpNCRKe7--oZGO25VWMw';
-const H = {'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
+const SU='https://ooziprpnyoorifmemser.supabase.co';
+const AK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemlwcnBueW9vcmlmbWVtc2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTQ5MjksImV4cCI6MjA5NDE3MDkyOX0.Lrn4NkZYhhDNaJ0mwqhobp6xpNCRKe7--oZGO25VWMw';
+const H={apikey:AK,'Authorization':'Bearer '+AK};
+let S={rm:null,ad:null,fit:[],acts:[],rmAll:[],loaded:false,td:''};
+let FR='3m';
 
-async function query(table,params=''){
-  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`,{headers:H});
-  if(!r.ok)throw new Error(`${table}: ${r.status}`);
-  return r.json();
-}
+const n=v=>{const x=Number(v);return(isNaN(x)||x===0)?null:x};
+const fmt=(v,s='')=>v!==null&&v!==undefined?`${v}${s}`:'<span class="na">—</span>';
+const fmtH=m=>{if(!m)return'<span class="na">—</span>';return`${Math.floor(m/60)}h${String(Math.round(m%60)).padStart(2,'0')}m`};
+const td=()=>new Date().toISOString().slice(0,10);
+const dAgo=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
+const rcC=c=>c==='verde'?'var(--teal)':c==='amarillo'?'var(--amber)':'var(--rose)';
+const rcK=c=>c==='verde'?'ct':c==='amarillo'?'ca':'cr';
+const rcE=c=>c==='verde'?'🟢':c==='amarillo'?'🟡':'🔴';
+const si=t=>({Swim:'🏊',Ride:'🚴',VirtualRide:'🚴',Run:'🏃',VirtualRun:'🏃',WeightTraining:'🏋️',Yoga:'🧘',TrailRun:'⛰️',Walk:'🚶'}[t]||'⚡');
+const sc=t=>['Swim'].includes(t)?'var(--blue)':['Ride','VirtualRide'].includes(t)?'var(--amber)':['Run','VirtualRun','TrailRun'].includes(t)?'var(--teal)':'var(--violet)';
+const sn=t=>({Swim:'Natación',Ride:'Ciclismo',VirtualRide:'Ciclismo',Run:'Carrera',VirtualRun:'Cinta',WeightTraining:'Fuerza',Yoga:'Yoga',TrailRun:'Trail'}[t]||t);
 
-function n(v){const x=Number(v);return(isNaN(x)||x===0)?null:x}
-function fmt(v,s=''){return v!==null?`${v}${s}`:'<span class="na">—</span>'}
-function fmtH(min){if(!min)return'<span class="na">—</span>';return`${Math.floor(min/60)}h ${Math.round(min%60)}m`}
-function rcClass(c){return c==='verde'?'green':c==='amarillo'?'yellow':'red'}
-function rcEmoji(c){return c==='verde'?'🟢':c==='amarillo'?'🟡':'🔴'}
-function rcColor(c){return c==='verde'?'var(--green)':c==='amarillo'?'var(--yellow)':'var(--red)'}
+function ring(p,col,sz,sw,inner){
+  const r=(sz-sw)/2,c=2*Math.PI*r,f=(Math.min(p||0,100)/100)*c;
+  return`<div class="rw" style="width:${sz}px;height:${sz}px"><svg class="rs" width="${sz}" height="${sz}"><circle class="rb" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}"/><circle class="ra" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}" style="stroke:${col}" stroke-dasharray="${f.toFixed(1)} ${c.toFixed(1)}"/></svg><div class="ri">${inner}</div></div>`;
+}
+function bar(p,col){return`<div class="bar"><div class="bf" style="width:${Math.min(100,p||0)}%;background:${col}"></div></div>`}
 
-function svgRing(pct,color,size,sw,inner){
-  const r=(size-sw)/2,c=2*Math.PI*r,f=(Math.min(pct||0,100)/100)*c;
-  return`<div class="ring-wrap" style="width:${size}px;height:${size}px">
-    <svg class="ring-svg" width="${size}" height="${size}">
-      <circle class="ring-bg" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"/>
-      <circle class="ring-arc" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"
-        stroke="${color}" stroke-dasharray="${f.toFixed(1)} ${c.toFixed(1)}"/>
-    </svg>
-    <div class="ring-inner">${inner}</div></div>`;
-}
-function bar(pct,color){
-  return`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct||0)}%;background:${color}"></div></div>`;
-}
-function insightHRV(v,b){
+function iHRV(v,b,acts7){
   if(!v)return'Intervals aún no sincronizó — disponible después de las 9am.';
   const d=((v-b)/b)*100;
-  if(d>=10)return`↑ ${d.toFixed(0)}% sobre baseline. SNA muy recuperado. Día para cargar.`;
-  if(d>=0)return`En línea con baseline. Recuperación normal.`;
-  if(d>=-10)return`↓ ${Math.abs(d).toFixed(0)}% bajo baseline. Bajo estrés. Máximo Z2.`;
-  return`↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA estresado. Descansa.`;
+  const heavy=acts7.filter(a=>new Date(a.fecha)>=new Date(Date.now()-86400000)&&(a.tss||0)>100);
+  const ctx=heavy.length?` Sesión intensa ayer (TSS ${heavy.reduce((s,a)=>s+(a.tss||0),0)}).`:'';
+  if(d>=15)return`↑ ${d.toFixed(0)}% sobre baseline.${ctx} SNA muy recuperado. Día ideal para carga alta.`;
+  if(d>=5)return`↑ ${d.toFixed(0)}% sobre baseline. Buena recuperación.${ctx} Verde para entrenar.`;
+  if(d>=-5)return`En baseline (${b} ms). Recuperación normal.${ctx}`;
+  if(d>=-15)return`↓ ${Math.abs(d).toFixed(0)}% bajo baseline.${ctx} Máximo Z2 hoy. Prioriza sueño.`;
+  return`↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA bajo estrés.${ctx} Descanso activo.`;
 }
-function insightRHR(v,b){
-  if(!v)return'Intervals aún no sincronizó — disponible después de las 9am.';
+function iRHR(v,b){
+  if(!v)return'Sin dato de FC reposo.';
   const d=v-b;
-  if(d<=-3)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón eficiente. Positivo.`;
-  if(d<=2)return`Normal (±${Math.abs(d).toFixed(0)} bpm de base). Sin alarmas.`;
-  if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga.`;
-  return`+${d.toFixed(0)} bpm sobre base. Estrés fisiológico.`;
+  if(d<=-4)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón muy eficiente. Señal positiva.`;
+  if(d<=2)return`Normal (${v} bpm, base ${b} bpm). Sin alarmas.`;
+  if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga o deshidratación.`;
+  if(d<=8)return`+${d.toFixed(0)} bpm. Fatiga significativa. Revisa carga y descanso.`;
+  return`+${d.toFixed(0)} bpm. Reduce intensidad. Posible inicio de enfermedad.`;
 }
-function insightSleep(v){
-  if(!v)return'Sin datos de sueño disponibles aún.';
-  if(v>=85)return'Excelente. Recovery maximizado.';
-  if(v>=70)return'Bueno. Margen en fases profundas.';
-  if(v>=55)return'Regular. Acuéstate 30 min antes esta noche.';
-  return'Insuficiente. Oscuridad, 18°C, sin pantallas 1h antes.';
+function iSlp(v,h,nd){
+  if(!v)return'Sin datos de sueño disponibles.';
+  const def=h&&nd?(nd/60-h).toFixed(1):null;
+  let rec=def&&Number(def)>0.5?` Necesitas ${(nd/60).toFixed(1)}h esta noche.`:def&&Number(def)<=0?' Cuota cumplida.':'';
+  if(v>=90)return`Excepcional (${v}%). Recovery maximizado.${rec}`;
+  if(v>=80)return`Excelente (${v}%).${rec}`;
+  if(v>=70)return`Bueno (${v}%). Margen en sueño profundo.${rec}`;
+  if(v>=55)return`Regular (${v}%).${rec} Acuéstate 30 min antes esta noche.`;
+  return`Insuficiente (${v}%).${rec} Oscuridad total, 18°C, sin pantallas 1h antes.`;
 }
-function insightBB(v){
-  if(!v)return'Sin dato — Body Battery no disponible en esta integración.';
-  if(v>=75)return'Energía alta. Buena ventana para intensidad.';
-  if(v>=50)return'Energía moderada. Entrena con mesura.';
-  if(v>=25)return'Energía baja. Solo Z1-Z2.';
-  return'Energía muy baja. El cuerpo pide recuperación.';
+function iResp(v){
+  if(!v)return'Ingresa resp:XX en Intervals → Bienestar → Comments cada mañana.';
+  if(v<=12)return`${v} brpm. Bajo lo normal. Monitorear.`;
+  if(v<=16)return`${v} brpm. Normal (óptimo 12-16). Sin alarmas.`;
+  if(v<=19)return`${v} brpm. Levemente elevado. Posible estrés.`;
+  return`${v} brpm. Elevado. Señal de estrés fisiológico.`;
+}
+function iTSB(t){
+  if(t===null)return'';
+  if(t>25)return'🌟 Muy fresco. Ideal para competir o test.';
+  if(t>10)return'✅ Fresco. Buenas condiciones para calidad.';
+  if(t>-5)return'🎯 Zona óptima Ironman. Listo para competir.';
+  if(t>-15)return'⚡ Fatiga moderada. Normal en bloque.';
+  if(t>-30)return'⚠️ Fatiga alta. Monitorea señales.';
+  return'🔴 Fatiga muy alta. Considera semana de recuperación.';
 }
 
-async function render(){
-  const today=new Date().toISOString().slice(0,10);
-  const diffDays=Math.round((new Date('2026-10-10').getTime()-Date.now())/86400000);
+async function qS(t,p=''){const r=await fetch(`${SU}/rest/v1/${t}?${p}`,{headers:H});return r.json()}
 
-  // Cargar últimos 10 días con datos + analisis de hoy
-  const [rmAll, histRows, adRows] = await Promise.all([
-    query('recovery_metrics','order=fecha.desc&limit=10&select=*'),
-    query('recovery_metrics','order=fecha.desc&limit=10&select=fecha,recovery_score,recovery_color,hrv_hoy'),
-    query('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb&limit=1`)
-  ]);
+async function loadAll(){
+  const btn=document.getElementById('sb');
+  btn.textContent='...';
+  try{
+    const today=td();
+    const [rmAll,adR,fitR,actsR]=await Promise.all([
+      qS('recovery_metrics','order=fecha.desc&limit=14&select=*'),
+      qS('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb`),
+      qS('fitness_diario','order=fecha.asc&select=fecha,ctl,atl,tsb'),
+      qS('actividades','order=fecha.desc&limit=50&select=*')
+    ]);
+    const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
+    S={rm,ad:adR[0]||{},fit:Array.isArray(fitR)?fitR:[],acts:Array.isArray(actsR)?actsR:[],rmAll,loaded:true,td:today};
+    rRec();rFit(FR);rVol();rAct();rHW();
+  }catch(e){
+    ['rc','fc','vc','ac','hc'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML=`<div class="loader" style="color:var(--rose)">Error: ${e.message}</div>`;
+    });
+  }
+  btn.textContent='↻ SYNC';
+}
 
-  // FALLBACK CORRECTO: buscar el día más reciente con HRV real
-  // Si hoy no tiene datos, usar ayer
-  const rm = rmAll.find(r=>n(r.hrv_hoy)!==null) || rmAll[0] || {};
-  const isToday = rm.fecha === today;
-  const ad = adRows[0] || {};
+function rRec(){
+  const {rm,ad,acts,td,rmAll}=S;
+  const isToday=rm.fecha===td;
+  const rs=n(rm.recovery_score)??50,rc=rm.recovery_color||'amarillo';
+  const rcol=rcC(rc),rk=rcK(rc);
+  const hv=n(rm.hrv_hoy),rv=n(rm.fc_reposo_hoy);
+  const hb=n(rm.hrv_baseline)??43,rb=n(rm.fc_reposo_baseline)??53;
+  const sh=n(rm.horas_sueno),sp=n(rm.sleep_perf_pct),sn2=n(rm.sleep_need_min),rsp=n(rm.resp_rate);
+  const ctl=n(ad.ctl),atl=n(ad.atl),tsb=n(ad.tsb);
+  const acts7=acts.filter(a=>new Date(a.fecha)>=new Date(Date.now()-7*86400000));
+  const slpRing=sp!==null?ring(sp,'var(--violet)',68,8,`<span style="font-size:14px;font-weight:700;font-family:'Space Mono',monospace;color:var(--violet)">${Math.round(sp)}</span>`):'';
 
-  // Badge si mostramos datos de ayer
-  const staleBadge = !isToday && rm.fecha
-    ? `<span class="stale">datos del ${rm.fecha.slice(5)} · sync a las 9am</span>`
-    : '';
-  document.getElementById('subtitle').innerHTML=`${today} · ${diffDays} días para Hawaii 🏝️ ${staleBadge}`;
+  document.getElementById('rc').innerHTML=`
+<div class="hero" style="border-color:${rcol}44">
+  ${ring(rs,rcol,108,11,`<span class="rn ${rk}">${rs}</span><span class="ru">%</span>`)}
+  <div class="hr">
+    <div class="hl">Recovery Score</div>
+    <div class="hs ${rk}">${rcE(rc)} ${rc.charAt(0).toUpperCase()+rc.slice(1)}</div>
+    <div class="hp">
+      <span class="pi pg">HRV ${n(rm.hrv_score)??'—'}%</span>
+      <span class="pi pb">FCR ${n(rm.fc_reposo_score)??'—'}%</span>
+      <span class="pi pv">Sueño ${n(rm.sleep_score)??'—'}%</span>
+      ${rsp?`<span class="pi pa">Resp ${n(rm.resp_score)??'—'}%</span>`:''}
+    </div>
+    ${!isToday?`<div class="stale">⏱ Datos del ${(rm.fecha||'').slice(5)} · sync 9am</div>`:''}
+  </div>
+</div>
 
-  const rscore=n(rm.recovery_score)??50;
-  const rc=rm.recovery_color||'amarillo';
-  const rcol=rcColor(rc);
-  const hrv_v=n(rm.hrv_hoy);
-  const rhr_v=n(rm.fc_reposo_hoy);
-  const hrv_b=n(rm.hrv_baseline)??43;
-  const rhr_b=n(rm.fc_reposo_baseline)??53;
-  const slp_h=n(rm.horas_sueno);
-  const slp_p=n(rm.sleep_perf_pct);
-  const slp_nd=n(rm.sleep_need_min);
-  const resp_v=n(rm.resp_rate);
-  const ctl=ad.ctl?Number(ad.ctl).toFixed(0):null;
-  const atl=ad.atl?Number(ad.atl).toFixed(0):null;
-  const tsb=ad.tsb?Number(ad.tsb):null;
-  const tsb_s=tsb!==null?`${tsb>=0?'+':''}${tsb.toFixed(1)}`:null;
+${ctl!==null?`<div class="ab ${tsb>10?'ag':tsb<-20?'ar':'aw'}">${iTSB(tsb)} CTL ${ctl.toFixed(0)} | ATL ${atl.toFixed(0)} | TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}</div>`:''}
 
-  // Historial para gráfico
-  const maxScore=Math.max(...histRows.map(h=>h.recovery_score||0),1);
-  const bars=[...histRows].reverse().map(h=>{
-    const pct=Math.round(((h.recovery_score||0)/maxScore)*100);
-    const col=rcColor(h.recovery_color||'amarillo');
-    const active=h.fecha===rm.fecha;
-    return`<div class="bar-col">
-      <div class="bar-col-fill" style="height:${pct}%;background:${col};opacity:${active?1:.65};${active?`box-shadow:0 0 8px ${col}`:''}"></div>
-      <span class="bar-col-lbl">${(h.fecha||'').slice(5)}</span>
+<div class="card" style="border-color:${hv&&hv>hb?'#00e5c828':'var(--edge)'}">
+  <div class="chd">💓 HRV · Variabilidad Cardíaca <span style="color:var(--faint)">lnRMSSD · 28d</span></div>
+  <div class="ml">Anoche · base ${hb} ms</div>
+  <div class="mv ct">${fmt(hv,' ms')}</div>
+  ${hv?bar(Math.min(130,Math.round(hv/hb*100)),'var(--teal)'):''}
+  <div class="ins" style="border-color:var(--teal)">${iHRV(hv,hb,acts7)}</div>
+</div>
+
+<div class="card">
+  <div class="chd">❤️ FC Reposo <span style="color:var(--faint)">Intervals.icu</span></div>
+  <div class="ml">Hoy · base ${rb} bpm</div>
+  <div class="mv cb">${fmt(rv,' bpm')}</div>
+  ${rv?bar(Math.min(110,Math.round(rb/rv*100)),'var(--blue)'):''}
+  <div class="ins" style="border-color:var(--blue)">${iRHR(rv,rb)}</div>
+</div>
+
+<div class="card">
+  <div class="chd">🌙 Sueño <span style="color:var(--faint)">${sh?sh.toFixed(1)+'h':'sin dato'}</span></div>
+  <div style="display:flex;align-items:flex-start;gap:14px">
+    ${slpRing}
+    <div style="flex:1">
+      <div class="ml">Sleep Performance</div>
+      <div class="mv cv2" style="font-size:19px;margin-top:2px">${sp?Math.round(sp)+'%':'—'}</div>
+      <div class="ins" style="border-color:var(--violet);margin-top:7px">${iSlp(sp,sh,sn2)}</div>
+      ${sn2?`<div style="font-size:10px;color:var(--violet);margin-top:7px;font-family:'Space Mono',monospace">🎯 Esta noche: <b>${fmtH(sn2)}</b></div>`:''}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="chd">🫁 Respiración <span style="color:var(--faint)">Comments Intervals</span></div>
+  <div class="mv cl2">${fmt(rsp,' brpm')}</div>
+  <div class="ins" style="border-color:var(--lime)">${iResp(rsp)}</div>
+</div>
+
+<div class="card">
+  <div class="chd">📈 Recovery · 10 días</div>
+  <div style="display:flex;align-items:flex-end;gap:4px;height:54px;margin-bottom:6px">
+    ${rmAll.slice(0,10).reverse().map(h=>{
+      const p=Math.round(((h.recovery_score||0)/100)*54);
+      const col=rcC(h.recovery_color||'amarillo');
+      const act=h.fecha===rm.fecha;
+      return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end"><div style="width:100%;height:${Math.max(3,p)}px;background:${col};border-radius:3px 3px 0 0;opacity:${act?1:.5};${act?`box-shadow:0 0 8px ${col}`:''}"></div><span style="font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">${(h.fecha||'').slice(5)}</span></div>`;
+    }).join('')}
+  </div>
+</div>
+<button class="ref" onclick="loadAll()">↻ Actualizar datos</button>
+<div class="ft">Nyso Coach · algoritmos WHOOP · Intervals.icu<br>Data provided by Garmin®</div>`;
+}
+
+function rFit(range){
+  FR=range;
+  const {fit}=S;
+  if(!fit.length){document.getElementById('fc').innerHTML='<div class="loader">Sin datos de fitness</div>';return}
+  const days=range==='1y'?365:range==='6m'?180:range==='3m'?90:range==='45d'?45:30;
+  const cut=dAgo(days);
+  const data=fit.filter(d=>d.fecha>=cut);
+  if(!data.length){document.getElementById('fc').innerHTML='<div class="loader">Sin datos en rango</div>';return}
+  const lat=data[data.length-1];
+  const ctl=lat.ctl,atl=lat.atl,tsb=lat.tsb;
+  const W=360,H=160,PL=36,PR=10,PT=8,PB=22,cw=W-PL-PR,ch=H-PT-PB;
+  const all=[...data.map(d=>d.ctl),...data.map(d=>d.atl),...data.map(d=>d.tsb)];
+  const minV=Math.min(...all)-5,maxV=Math.max(...all)+5;
+  const xs=i=>(i/(data.length-1||1))*cw+PL;
+  const ys=v=>ch-(((v-minV)/(maxV-minV))*ch)+PT;
+  const path=k=>data.map((d,i)=>`${i?'L':'M'}${xs(i).toFixed(1)} ${ys(d[k]).toFixed(1)}`).join(' ');
+  const area=k=>{const z=ys(Math.max(0,minV));return path(k)+` L${xs(data.length-1).toFixed(1)} ${z} L${xs(0).toFixed(1)} ${z} Z`};
+  const step=Math.max(1,Math.floor(data.length/5));
+  const xl=data.filter((_,i)=>i%step===0||i===data.length-1).map(d=>{const i=data.indexOf(d);return`<text x="${xs(i).toFixed(1)}" y="${H-4}" text-anchor="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${d.fecha.slice(5)}</text>`}).join('');
+  const yl=[minV,0,Math.round((minV+maxV)/2),maxV].map(v=>`<text x="${PL-4}" y="${ys(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${Math.round(v)}</text>`).join('');
+  const zY=ys(0);
+
+  document.getElementById('fc').innerHTML=`
+<div class="card">
+  <div class="chd">📊 Fitness · Fatiga · Forma
+    <div class="rbs">${['1m','45d','3m','6m','1y'].map(r=>`<span class="rb2${r===range?' a':''}" onclick="rFit('${r}')">${r}</span>`).join('')}</div>
+  </div>
+  <div class="g3" style="margin-bottom:14px">
+    <div class="ci"><div class="cl">CTL</div><div class="cv cb">${ctl.toFixed(0)}</div><div class="cs">Fitness</div></div>
+    <div class="ci"><div class="cl">ATL</div><div class="cv ca">${atl.toFixed(0)}</div><div class="cs">Fatiga</div></div>
+    <div class="ci"><div class="cl">TSB</div><div class="cv ${tsb>=0?'ct':'cr'}">${tsb>=0?'+':''}${tsb.toFixed(1)}</div><div class="cs">Forma</div></div>
+  </div>
+  <div class="cw">
+    <svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4d9fff" stop-opacity=".25"/><stop offset="100%" stop-color="#4d9fff" stop-opacity=".02"/></linearGradient>
+        <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffb830" stop-opacity=".2"/><stop offset="100%" stop-color="#ffb830" stop-opacity=".02"/></linearGradient>
+      </defs>
+      <line x1="${PL}" y1="${zY.toFixed(1)}" x2="${W-PR}" y2="${zY.toFixed(1)}" stroke="#1e1e30" stroke-width="1" stroke-dasharray="3,3"/>
+      <path d="${area('ctl')}" fill="url(#gC)"/>
+      <path d="${area('atl')}" fill="url(#gA)"/>
+      <path d="${path('ctl')}" fill="none" stroke="#4d9fff" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="${path('atl')}" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="${path('tsb')}" fill="none" stroke="#00e5c8" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="4,3"/>
+      ${xl}${yl}
+      <circle cx="${xs(data.length-1).toFixed(1)}" cy="${ys(ctl).toFixed(1)}" r="3" fill="#4d9fff"/>
+      <circle cx="${xs(data.length-1).toFixed(1)}" cy="${ys(atl).toFixed(1)}" r="3" fill="#ffb830"/>
+      <circle cx="${xs(data.length-1).toFixed(1)}" cy="${ys(tsb).toFixed(1)}" r="3" fill="#00e5c8"/>
+    </svg>
+  </div>
+  <div class="cleg">
+    <span class="li"><span class="ld" style="background:var(--blue)"></span>CTL Fitness</span>
+    <span class="li"><span class="ld" style="background:var(--amber)"></span>ATL Fatiga</span>
+    <span class="li"><span class="ld" style="background:var(--teal);opacity:.8"></span>TSB Forma</span>
+  </div>
+</div>
+<div class="card">
+  <div class="chd">🎯 Zonas de Forma TSB</div>
+  <div style="font-size:11px;color:var(--soft);line-height:1">
+    ${[['> +25','Muy fresco','cs2','Test o competición'],['10 a 25','Fresco','cb','Sesiones de calidad'],['-5 a 10','Óptimo Ironman','ct','✅ Listo para competir'],['-15 a -5','Fatiga moderada','ca','Normal en bloque'],['-30 a -15','Fatiga alta','cr','⚠️ Monitorear'],['< -30','Alto riesgo','cr','🔴 Reducir carga']].map(([r,nm,c,d])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--edge)">
+      <span><span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px">${r}</span>&nbsp; ${nm}</span>
+      <span style="font-size:10px;color:var(--faint)">${d}</span>
+    </div>`).join('')}
+  </div>
+  <div class="ins" style="margin-top:10px;border-color:${tsb>10?'var(--teal)':tsb<-20?'var(--rose)':'var(--amber)'}">
+    <b>Hoy TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}:</b> ${iTSB(tsb)}
+  </div>
+</div>`;
+}
+
+function rVol(){
+  const {acts}=S;
+  const now=new Date(),dow=now.getDay()===0?6:now.getDay()-1;
+  const ws=new Date(now.getTime()-dow*86400000).toISOString().slice(0,10);
+  const pws=new Date(new Date(ws).getTime()-7*86400000).toISOString().slice(0,10);
+  const aC=acts.filter(a=>a.fecha>=ws);
+  const aP=acts.filter(a=>a.fecha>=pws&&a.fecha<ws);
+  const gS=(list,type)=>list.filter(a=>type==='Swim'?a.tipo==='Swim':type==='Ride'?['Ride','VirtualRide'].includes(a.tipo):type==='Run'?['Run','VirtualRun','TrailRun'].includes(a.tipo):a.tipo===type);
+  const rows=[{k:'Swim',name:'Natación',icon:'🏊',col:'var(--blue)'},{k:'Ride',name:'Ciclismo',icon:'🚴',col:'var(--amber)'},{k:'Run',name:'Carrera',icon:'🏃',col:'var(--teal)'},{k:'WeightTraining',name:'Fuerza',icon:'🏋️',col:'var(--violet)'},{k:'Yoga',name:'Yoga',icon:'🧘',col:'var(--soft)'}];
+  const tC=aC.reduce((s,a)=>s+(a.tss||0),0),tP=aP.reduce((s,a)=>s+(a.tss||0),0);
+  const ramp=tP>0?((tC-tP)/tP*100):0;
+
+  document.getElementById('vc').innerHTML=`
+<div class="card">
+  <div class="chd">📅 Semana Actual <span style="color:var(--faint)">desde lunes ${ws.slice(5)}</span></div>
+  <div class="g3" style="margin-bottom:10px">
+    <div class="ci"><div class="cl">Sesiones</div><div class="cv ct">${aC.length}</div></div>
+    <div class="ci"><div class="cl">TSS Total</div><div class="cv ca">${tC}</div></div>
+    <div class="ci"><div class="cl">vs anterior</div><div class="cv ${ramp>0?'ca':'ct'}">${ramp>0?'+':''}${ramp.toFixed(0)}%</div></div>
+  </div>
+  ${ramp>15?`<div class="ins" style="border-color:var(--amber)">⚠️ Rampa +${ramp.toFixed(0)}% sobre semana anterior. Riesgo de lesión. Considera limitar carga.</div>`:''}
+</div>
+<div class="card">
+  <div class="chd">🏊🚴🏃 Volumen por Disciplina</div>
+  <table class="vt">
+    <thead><tr><th>Deporte</th><th>Tiempo</th><th>Km</th><th>TSS</th><th>Δ sem</th></tr></thead>
+    <tbody>
+    ${rows.map(r=>{
+      const gc=gS(aC,r.k),gp=gS(aP,r.k);
+      if(!gc.length&&!gp.length)return'';
+      const dur=gc.reduce((s,a)=>s+(a.duracion_min||0),0);
+      const km=gc.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);
+      const tss=gc.reduce((s,a)=>s+(a.tss||0),0);
+      const tssP=gp.reduce((s,a)=>s+(a.tss||0),0);
+      const delta=tssP>0?((tss-tssP)/tssP*100):null;
+      return`<tr>
+        <td><span style="color:${r.col};font-weight:600">${r.icon} ${r.name}</span></td>
+        <td style="font-size:10px;color:var(--soft)">${dur?`${Math.floor(dur/60)}h${String(dur%60).padStart(2,'0')}m`:'—'}</td>
+        <td style="font-size:10px;color:var(--soft)">${km?km.toFixed(0)+'km':'—'}</td>
+        <td style="color:var(--amber);font-weight:600">${tss||'—'}</td>
+        <td style="font-size:10px;color:${delta>0?'var(--rose)':'var(--teal)'}">${delta!==null?(delta>0?'+':'')+delta.toFixed(0)+'%':'—'}</td>
+      </tr>`;
+    }).join('')}
+    <tr style="font-weight:700;border-top:1px solid var(--faint)">
+      <td>Total</td>
+      <td style="font-size:10px">${(()=>{const t=aC.reduce((s,a)=>s+(a.duracion_min||0),0);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</td>
+      <td style="font-size:10px">${(()=>{const k=aC.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);return k?k.toFixed(0)+'km':'—'})()}</td>
+      <td style="color:var(--amber)">${tC}</td><td></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="card">
+  <div class="chd">📅 Semana Anterior <span style="color:var(--faint)">${pws.slice(5)}</span></div>
+  <div style="font-size:11px;color:var(--soft);display:flex;gap:16px;font-family:'Space Mono',monospace;flex-wrap:wrap">
+    <span>${aP.length} sesiones</span><span class="ca">TSS ${tP}</span>
+    <span>${(()=>{const t=aP.reduce((s,a)=>s+(a.duracion_min||0),0);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</span>
+    <span>${(()=>{const k=aP.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);return k?k.toFixed(0)+'km':'—'})()}</span>
+  </div>
+</div>`;
+}
+
+function rAct(){
+  const {acts}=S;
+  const byDate={};
+  acts.slice(0,25).forEach(a=>{const d=a.fecha;if(!byDate[d])byDate[d]=[];byDate[d].push(a)});
+  const html=Object.keys(byDate).sort((a,b)=>b.localeCompare(a)).map(date=>{
+    const da=byDate[date];
+    const dt=da.reduce((s,a)=>s+(a.tss||0),0);
+    return`<div class="card"><div class="chd">${date.slice(5)} <span class="ca">TSS ${dt}</span></div>
+      ${da.map(a=>{
+        const col=sc(a.tipo);
+        const dur=a.duracion_min;
+        const km=parseFloat(a.distancia_km)||0;
+        const pw=a.potencia_avg?`${a.potencia_avg}W/NP${a.potencia_np}`:'';
+        const hr=a.fc_avg?`FC ${a.fc_avg}`:'';
+        const meta=[dur?`${Math.floor(dur/60)}h${String(dur%60).padStart(2,'0')}m`:'',km?km.toFixed(1)+'km':'',pw,hr].filter(Boolean).join(' · ');
+        return`<div class="ai"><div class="aic" style="background:${col}18;border:1px solid ${col}35">${si(a.tipo)}</div><div class="aib"><div class="ain">${a.nombre||sn(a.tipo)}</div><div class="aim">${meta}</div></div><div class="ait">${a.tss||'—'}</div></div>`;
+      }).join('')}
     </div>`;
   }).join('');
+  document.getElementById('ac').innerHTML=html||'<div class="loader">Sin actividades</div>';
+}
 
-  const heroRing=svgRing(rscore,rcol,110,12,
-    `<span class="ring-num ${rcClass(rc)}">${rscore}</span><span class="ring-pct">%</span>`);
-  const sleepRing=slp_p!==null
-    ?svgRing(slp_p,'var(--purple)',72,8,`<span class="ring-mini-num c-purple">${Math.round(slp_p)}</span>`)
-    :'';
+function rHW(){
+  const {fit,acts}=S;
+  const hw=new Date('2026-10-10');
+  const diff=Math.round((hw.getTime()-Date.now())/86400000);
+  const lat=fit[fit.length-1]||{};
+  const ctl=lat.ctl||0,tsb=lat.tsb||0;
+  const ctlT=130,tapDate=new Date(hw.getTime()-21*86400000);
+  const dTap=Math.round((tapDate.getTime()-Date.now())/86400000);
+  const wBuild=Math.max(0,Math.floor(dTap/7));
+  const tss7=acts.filter(a=>new Date(a.fecha)>=new Date(Date.now()-7*86400000)).reduce((s,a)=>s+(a.tss||0),0);
+  const k=1/42;let pCTL=ctl;
+  for(let i=0;i<diff;i++){const d=i<dTap?tss7/7:(tss7/7)*0.4;pCTL=pCTL+(d-pCTL)*(1-Math.exp(-k))}
+  const last30=fit.slice(-30),maxC=Math.max(...last30.map(d=>d.ctl),1);
 
-  document.getElementById('app').innerHTML=`
-
-<!-- HERO -->
-<div class="hero" style="border-color:${rcol}33">
-  ${heroRing}
-  <div class="hero-info">
-    <div class="hero-title">Recovery Score</div>
-    <div class="hero-state c-${rcClass(rc)}">${rcEmoji(rc)} ${rc.charAt(0).toUpperCase()+rc.slice(1)}</div>
-    <div class="hero-comps">
-      HRV <b class="c-green">${n(rm.hrv_score)??'—'}%</b> &nbsp;
-      FCR <b class="c-blue">${n(rm.fc_reposo_score)??'—'}%</b> &nbsp;
-      Sueño <b class="c-purple">${n(rm.sleep_score)??'—'}%</b>
-      ${resp_v?`&nbsp; Resp <b style="color:var(--orange)">${n(rm.resp_score)??'—'}%</b>`:''}
-    </div>
-    <div class="source-tag">
-      Intervals.icu REST${resp_v?` · resp ${resp_v} brpm`:''}
-      ${!isToday?'<br>⚠ Mostrando último dato disponible':''}
-    </div>
+  document.getElementById('hc').innerHTML=`
+<div class="hwb">
+  <div class="hwn">${diff}</div>
+  <div class="hwl">DÍAS PARA IRONMAN HAWAII · 10 OCT 2026</div>
+  <div class="hwp">
+    <div>📍 CTL actual <b class="cb">${ctl.toFixed(0)}</b> · Objetivo <b class="ct">${ctlT}</b> · Gap <b class="${ctl>=ctlT?'ct':'ca'}">${(ctl-ctlT).toFixed(0)}</b></div>
+    <div>📅 Build: <b class="cv2">${wBuild}</b> semanas · Taper desde ${tapDate.toISOString().slice(0,10).slice(5)}</div>
+    <div>🎯 CTL proyectado race day: <b class="${pCTL>=ctlT?'ct':'ca'}">${pCTL.toFixed(0)}</b> ${pCTL>=ctlT?'✅':'⚠️'}</div>
+    <div>📊 TSS 7 días: <b class="ca">${tss7}</b> · Prom/día: <b class="ca">${(tss7/7).toFixed(0)}</b></div>
   </div>
 </div>
-
-<!-- HRV -->
-<div class="card" style="border-color:var(--green)22">
-  <div class="card-title">💓 HRV · Variabilidad Cardíaca</div>
-  <div class="metric-label">Noche del ${(rm.fecha||today).slice(5)}</div>
-  <div class="metric-val c-green">${fmt(hrv_v,' ms')}</div>
-  <div class="metric-base">Baseline 28d: ${hrv_b} ms · Histórico: 43 ms</div>
-  ${hrv_v?bar(Math.min(130,Math.round(hrv_v/hrv_b*100)),'var(--green)'):''}
-  <div class="insight b-green">${insightHRV(hrv_v,hrv_b)}</div>
-</div>
-
-<!-- FC Reposo -->
-<div class="card" style="border-color:var(--blue)22">
-  <div class="card-title">❤️ FC Reposo · Intervals.icu</div>
-  <div class="metric-label">Mañana del ${(rm.fecha||today).slice(5)}</div>
-  <div class="metric-val c-blue">${fmt(rhr_v,' bpm')}</div>
-  <div class="metric-base">Baseline 28d: ${rhr_b} bpm · Histórico: 53 bpm</div>
-  ${rhr_v?bar(Math.min(100,Math.round(rhr_b/rhr_v*100)),'var(--blue)'):''}
-  <div class="insight b-blue">${insightRHR(rhr_v,rhr_b)}</div>
-</div>
-
-<!-- Sueño -->
-<div class="card" style="border-color:var(--purple)22">
-  <div class="card-title">🌙 Sueño · ${slp_h?slp_h.toFixed(1)+'h dormido':'sincronizando...'}</div>
-  <div style="display:flex;align-items:flex-start;gap:14px">
-    ${sleepRing}
-    <div style="flex:1">
-      <div class="metric-label">Sleep Performance</div>
-      <div class="metric-val c-purple" style="font-size:20px">${slp_p?Math.round(slp_p)+'%':'—'}</div>
-      <div class="insight b-purple" style="margin-top:6px">${insightSleep(slp_p)}</div>
-      ${slp_nd?`<div style="font-size:11px;color:var(--purple);margin-top:8px">🎯 Esta noche: <b>${fmtH(slp_nd)}</b></div>`:''}
-    </div>
-  </div>
-</div>
-
-<!-- CTL/ATL/TSB -->
-${ctl||atl||tsb_s?`
-<div class="card" style="border-color:var(--blue)22">
-  <div class="card-title">📊 Forma Actual · Intervals.icu</div>
-  <div class="ctl-grid">
-    <div class="ctl-item">
-      <div class="ctl-lbl">CTL</div>
-      <div class="ctl-val c-blue">${ctl??'—'}</div>
-      <div class="ctl-sub">Fitness</div>
-    </div>
-    <div class="ctl-item">
-      <div class="ctl-lbl">ATL</div>
-      <div class="ctl-val c-orange">${atl??'—'}</div>
-      <div class="ctl-sub">Fatiga</div>
-    </div>
-    <div class="ctl-item">
-      <div class="ctl-lbl">TSB</div>
-      <div class="ctl-val ${tsb!==null&&tsb>=0?'c-green':'c-red'}">${tsb_s??'—'}</div>
-      <div class="ctl-sub">Forma</div>
-    </div>
-  </div>
-</div>`:''}
-
-<!-- Historial -->
 <div class="card">
-  <div class="card-title">📈 Recovery · últimos 10 días</div>
-  <div class="chart-area">${bars}</div>
+  <div class="chd">🏁 Plan de Forma</div>
+  ${[['Race day TSB objetivo','-5 a +5','ct'],['CTL mínimo recomendado','120-140','cb'],['Inicio taper',tapDate.toISOString().slice(0,10),'cv2'],['Semanas de build',wBuild,'cb'],['TSS semanal necesario',`${Math.round(tss7*1.05)}-${Math.round(tss7*1.15)}`,'ca']].map(([l,v,c])=>`
+  <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--edge);font-size:11px">
+    <span style="color:var(--soft)">${l}</span>
+    <span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px">${v}</span>
+  </div>`).join('')}
+  <div class="ins" style="margin-top:10px;border-color:${pCTL>=ctlT?'var(--teal)':'var(--amber)'}">
+    ${pCTL>=ctlT?`✅ Proyección favorable: CTL ~${pCTL.toFixed(0)} al race day. Mantén consistencia.`:`⚠️ Proyección CTL ~${pCTL.toFixed(0)} — bajo objetivo ${ctlT}. Necesitas +${Math.round((ctlT-pCTL)/wBuild*7)} TSS/sem en ${wBuild} semanas.`}
+  </div>
 </div>
+<div class="card">
+  <div class="chd">📈 CTL últimos 30 días</div>
+  <div style="display:flex;align-items:flex-end;gap:3px;height:48px">
+    ${last30.map((d,i)=>{const h=Math.round((d.ctl/maxC)*48);const last=i===last30.length-1;return`<div style="flex:1;height:${Math.max(2,h)}px;background:${last?'var(--blue)':'#4d9fff35'};border-radius:2px 2px 0 0;${last?'box-shadow:0 0 6px var(--blue)':''}"></div>`}).join('')}
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">
+    <span>${last30[0]?.fecha.slice(5)}</span><span>hoy ${ctl.toFixed(0)}</span>
+  </div>
+</div>`;
+}
 
-<!-- Hawaii -->
-<div class="hawaii">
-  <div class="hawaii-num">${diffDays}</div>
-  <div class="hawaii-lbl">días para Ironman Hawaii · 10 oct 2026</div>
-</div>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('a'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('a'));
+  document.getElementById(id).classList.add('a');
+  const tabs=['recovery','fitness','volume','acts','hawaii'];
+  document.querySelectorAll('.tab')[tabs.indexOf(id)]?.classList.add('a');
+  if(id==='fitness'&&S.loaded)rFit(FR);
+}
 
-<button class="refresh" onclick="location.reload()">↻ Actualizar datos</button>
-<div class="footer">Nyso Coach · algoritmos WHOOP · datos del ${rm.fecha||today}</div>
-`;}
-
-render().catch(e=>{
-  document.getElementById('app').innerHTML=`
-    <div style="padding:30px;color:var(--red);font-family:monospace;font-size:12px">
-      <b>Error:</b><br><br>${e.message}<br><br>
-      <button onclick="location.reload()" style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:14px;cursor:pointer">Reintentar</button>
-    </div>`;
-});
+loadAll();
 </script>
 </body>
 </html>
