@@ -13,106 +13,154 @@
 :root{--ink:#080810;--card:#141420;--edge:#1e1e30;--txt:#f0f0fa;--soft:#9090b0;--faint:#3a3a55;--na:#2a2a40;--teal:#00e5c8;--amber:#ffb830;--rose:#ff4d6d;--violet:#9b6dff;--blue:#4d9fff;--lime:#a3ff6d;--g:linear-gradient(135deg,#141420,#0e0e1a)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--ink);color:var(--txt);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
-.topbar{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--edge);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--edge);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .brand{display:flex;align-items:center;gap:10px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 2s infinite}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 2s infinite;flex-shrink:0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.bname{font-size:15px;font-weight:700;letter-spacing:.08em;font-family:'Space Mono',monospace}
-.bsub{font-size:9px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase}
-.sbtn{background:var(--edge);border:1px solid var(--faint);border-radius:8px;padding:7px 14px;color:var(--txt);font-size:11px;font-family:'Space Mono',monospace;cursor:pointer}
-.nav{display:flex;gap:2px;padding:12px 18px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--edge)}
+.bname{font-size:14px;font-weight:700;letter-spacing:.08em;font-family:'Space Mono',monospace}
+.bsub{font-size:9px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase}
+.sbtn{background:var(--teal);border:none;border-radius:8px;padding:8px 14px;color:#080810;font-size:11px;font-family:'Space Mono',monospace;font-weight:700;cursor:pointer;letter-spacing:.05em;flex-shrink:0;transition:opacity .2s}
+.sbtn:active{opacity:.7}
+.nav{display:flex;gap:2px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--edge)}
 .nav::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:8px 14px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--soft);border-bottom:2px solid transparent;font-family:'Space Mono',monospace;margin-bottom:-1px;transition:color .15s}
+.tab{flex-shrink:0;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--soft);border-bottom:2px solid transparent;font-family:'Space Mono',monospace;margin-bottom:-1px;transition:color .15s}
 .tab.a{color:var(--teal);border-color:var(--teal)}
-.sec{display:none;padding-bottom:48px}
+.sec{display:none;padding-bottom:60px}
 .sec.a{display:block}
-.card{background:var(--g);border:1px solid var(--edge);border-radius:14px;padding:16px 18px;margin:12px 14px 0}
-.chd{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:'Space Mono',monospace;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.card{background:var(--g);border:1px solid var(--edge);border-radius:14px;padding:15px 16px;margin:10px 12px 0}
+.chd{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:'Space Mono',monospace;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 .loader{text-align:center;padding:60px 20px;color:var(--soft);font-size:12px;font-family:'Space Mono',monospace}
-.spin{width:28px;height:28px;border:2px solid var(--edge);border-top-color:var(--teal);border-radius:50%;animation:rot .7s linear infinite;margin:0 auto 14px}
+.spin{width:26px;height:26px;border:2px solid var(--edge);border-top-color:var(--teal);border-radius:50%;animation:rot .7s linear infinite;margin:0 auto 14px}
 @keyframes rot{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex;align-items:flex-end}
+.modal{background:#0e0e1a;border-radius:20px 20px 0 0;border:1px solid var(--edge);border-bottom:none;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px 40px}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:14px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--edge);border:none;color:var(--txt);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.metric-def{background:rgba(0,229,200,.06);border:1px solid rgba(0,229,200,.15);border-radius:12px;padding:13px 14px;margin-bottom:12px;font-size:11px;line-height:1.7;color:var(--soft)}
+.metric-def b{color:var(--teal)}
+
 /* HERO */
-.hero{display:flex;align-items:center;gap:16px;margin:14px 14px 0;background:var(--g);border-radius:18px;padding:20px;border:1px solid var(--edge)}
+.hero{display:flex;align-items:center;gap:14px;margin:10px 12px 0;background:var(--g);border-radius:18px;padding:18px;border:1px solid var(--edge);cursor:pointer;-webkit-tap-highlight-color:rgba(0,229,200,.15);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.hero:active{opacity:.7;transform:scale(.99)}
 .rw{position:relative;flex-shrink:0}
 .rs{transform:rotate(-90deg);display:block}
-.rb{fill:none;stroke:var(--edge)}
+.rb2{fill:none;stroke:var(--edge)}
 .ra{fill:none;stroke-linecap:round;transition:stroke-dasharray 1.4s cubic-bezier(.4,0,.2,1)}
 .ri{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.rn{font-size:26px;font-weight:700;font-family:'Space Mono',monospace;line-height:1}
+.rn{font-size:24px;font-weight:700;font-family:'Space Mono',monospace;line-height:1}
 .ru{font-size:9px;color:var(--soft)}
 .hr{flex:1;min-width:0}
-.hl{font-size:9px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace}
-.hs{font-size:18px;font-weight:700;margin-top:4px}
-.hp{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-.pi{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 8px;border-radius:20px}
+.hl{font-size:9px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;font-family:'Space Mono',monospace}
+.hs{font-size:17px;font-weight:700;margin-top:3px}
+.hp{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.pi{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;padding:2px 7px;border-radius:20px;cursor:pointer}
 .pg{background:#00e5c818;color:var(--teal);border:1px solid #00e5c835}
 .pb{background:#4d9fff18;color:var(--blue);border:1px solid #4d9fff35}
 .pv{background:#9b6dff18;color:var(--violet);border:1px solid #9b6dff35}
 .pa{background:#ffb83018;color:var(--amber);border:1px solid #ffb83035}
-.stale{font-size:9px;color:var(--amber);font-family:'Space Mono',monospace;margin-top:6px}
-/* METRICS */
-.ml{font-size:9px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;font-family:'Space Mono',monospace}
-.mv{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;margin-top:2px}
+.pl{background:#a3ff6d18;color:var(--lime);border:1px solid #a3ff6d35}
+.stale{font-size:9px;color:var(--amber);font-family:'Space Mono',monospace;margin-top:5px}
+.tap-hint{font-size:9px;color:var(--faint);margin-top:4px;font-family:'Space Mono',monospace}
+
+/* METRIC CARDS */
+.mc{background:var(--g);border:1px solid var(--edge);border-radius:14px;padding:14px 16px;margin:10px 12px 0;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:rgba(0,229,200,.1);transition:border-color .2s,opacity .15s;font-family:inherit;color:inherit}
+.mc:active{border-color:var(--teal);opacity:.8}
+button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;display:flex}
+.ml2{font-size:9px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;font-family:'Space Mono',monospace}
+.mv{font-size:21px;font-weight:700;font-family:'Space Mono',monospace;line-height:1.1;margin-top:2px}
+.mbase{font-size:9px;color:var(--faint);margin-top:1px}
 .bar{height:5px;background:var(--edge);border-radius:3px;overflow:hidden;margin:6px 0}
 .bf{height:100%;border-radius:3px;transition:width 1.3s ease}
 .ins{font-size:11px;color:var(--soft);line-height:1.6;padding:9px 12px;background:rgba(0,0,0,.25);border-radius:9px;border-left:2px solid var(--faint);margin-top:6px}
-/* GRID */
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.ci{text-align:center;padding:10px 4px;background:rgba(0,0,0,.2);border-radius:10px}
-.cl{font-size:9px;color:var(--soft);text-transform:uppercase;font-family:'Space Mono',monospace}
-.cv{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;margin-top:2px}
-.cs{font-size:9px;color:var(--faint);margin-top:1px}
+.mc-row{display:flex;align-items:center;justify-content:space-between}
+.mc-arrow{font-size:16px;color:var(--faint)}
+
 /* CHART */
 .cw{width:100%;overflow:hidden}
 .csv{width:100%;display:block}
-.cleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.cleg{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
 .li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--soft);font-family:'Space Mono',monospace}
 .ld{width:10px;height:3px;border-radius:2px}
 .rbs{display:flex;gap:4px;flex-wrap:wrap}
-.rb2{padding:4px 9px;border-radius:6px;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;cursor:pointer;background:var(--edge);color:var(--soft);border:1px solid transparent}
-.rb2.a{background:#00e5c818;color:var(--teal);border-color:#00e5c840}
+.rb3{padding:4px 8px;border-radius:6px;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;cursor:pointer;background:var(--edge);color:var(--soft);border:1px solid transparent}
+.rb3.a{background:#00e5c818;color:var(--teal);border-color:#00e5c840}
+
+/* GRID */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ci{text-align:center;padding:10px 4px;background:rgba(0,0,0,.2);border-radius:10px}
+.cl3{font-size:9px;color:var(--soft);text-transform:uppercase;font-family:'Space Mono',monospace}
+.cv3{font-size:21px;font-weight:700;font-family:'Space Mono',monospace;margin-top:2px}
+.cs{font-size:9px;color:var(--faint);margin-top:1px}
+
 /* TABLE */
 .vt{width:100%;border-collapse:collapse;font-size:11px;font-family:'Space Mono',monospace}
 .vt th{font-size:9px;color:var(--soft);letter-spacing:.08em;text-transform:uppercase;padding:6px 6px;border-bottom:1px solid var(--edge);text-align:left;font-weight:600}
 .vt td{padding:8px 6px;border-bottom:1px solid var(--edge);vertical-align:middle}
 .vt tr:last-child td{border-bottom:none}
+
+/* HIST TABLE */
+.ht{width:100%;border-collapse:collapse;font-size:10px;font-family:'Space Mono',monospace;margin-top:10px}
+.ht th{font-size:9px;color:var(--faint);text-transform:uppercase;padding:4px 6px;border-bottom:1px solid var(--edge);text-align:left}
+.ht td{padding:6px 6px;border-bottom:1px solid var(--edge)}
+.ht tr:last-child td{border-bottom:none}
+
 /* ACTIVITIES */
-.ai{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--edge)}
+.ai{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--edge)}
 .ai:last-child{border-bottom:none}
-.aic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.aic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .aib{flex:1;min-width:0}
 .ain{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aim{font-size:10px;color:var(--soft);margin-top:2px;font-family:'Space Mono',monospace}
 .ait{font-size:11px;font-weight:700;font-family:'Space Mono',monospace;color:var(--amber);flex-shrink:0}
+
 /* HAWAII */
-.hwb{text-align:center;padding:24px;background:var(--g);border-radius:14px;border:1px solid var(--edge);margin:12px 14px 0;position:relative;overflow:hidden}
+.hwb{text-align:center;padding:22px;background:var(--g);border-radius:14px;border:1px solid var(--edge);margin:10px 12px 0;position:relative;overflow:hidden}
 .hwb::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,#9b6dff18,transparent 65%);pointer-events:none}
-.hwn{font-size:52px;font-weight:700;color:var(--violet);font-family:'Space Mono',monospace;line-height:1}
-.hwl{font-size:10px;color:var(--soft);margin-top:4px;letter-spacing:.08em}
-.hwp{margin-top:14px;font-size:11px;color:var(--soft);line-height:1.9;padding:12px 14px;background:rgba(0,0,0,.3);border-radius:10px;text-align:left}
+.hwn{font-size:50px;font-weight:700;color:var(--violet);font-family:'Space Mono',monospace;line-height:1}
+.hwl{font-size:10px;color:var(--soft);margin-top:4px;letter-spacing:.06em}
+.hwp{margin-top:12px;font-size:11px;color:var(--soft);line-height:1.9;padding:11px 13px;background:rgba(0,0,0,.3);border-radius:10px;text-align:left}
+
 /* ALERTS */
-.ab{margin:12px 14px 0;padding:12px 14px;border-radius:10px;border:1px solid;font-size:11px;line-height:1.5}
+.ab{margin:10px 12px 0;padding:11px 13px;border-radius:10px;border:1px solid;font-size:11px;line-height:1.5}
 .aw{background:#ffb83010;border-color:#ffb83040;color:var(--amber)}
 .ag{background:#00e5c810;border-color:#00e5c840;color:var(--teal)}
 .ar{background:#ff4d6d10;border-color:#ff4d6d40;color:var(--rose)}
-.ref{display:block;margin:16px 14px 0;width:calc(100% - 28px);background:var(--edge);border:1px solid var(--faint);border-radius:11px;padding:13px;color:var(--txt);font-size:12px;font-weight:600;font-family:'Space Mono',monospace;cursor:pointer;letter-spacing:.05em}
-.ft{font-size:9px;color:var(--faint);text-align:center;margin-top:14px;font-family:'Space Mono',monospace;padding:0 14px}
+
+.ref{display:block;margin:14px 12px 0;width:calc(100% - 24px);background:var(--edge);border:1px solid var(--faint);border-radius:11px;padding:13px;color:var(--txt);font-size:12px;font-weight:600;font-family:'Space Mono',monospace;cursor:pointer;letter-spacing:.05em}
+.ft{font-size:9px;color:var(--faint);text-align:center;margin-top:12px;font-family:'Space Mono',monospace;padding:0 12px}
 .na{color:var(--na)}
 .ct{color:var(--teal)}.ca{color:var(--amber)}.cr{color:var(--rose)}.cv2{color:var(--violet)}.cb{color:var(--blue)}.cl2{color:var(--lime)}.cs2{color:var(--soft)}
 </style>
 </head>
 <body>
+
+<!-- MODAL HISTÓRICO -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">Historial</div>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <div class="topbar">
   <div class="brand"><div class="dot"></div><div><div class="bname">NYSO</div><div class="bsub">Coach Triatlón</div></div></div>
-  <button class="sbtn" id="sb" onclick="loadAll()">↻ SYNC</button>
+  <button class="sbtn" id="sb" onclick="syncAll()">↻ SYNC</button>
 </div>
-<div class="nav" id="nav">
+<div class="nav">
   <div class="tab a" onclick="show('recovery')">Recovery</div>
   <div class="tab" onclick="show('fitness')">Fitness</div>
   <div class="tab" onclick="show('volume')">Volumen</div>
   <div class="tab" onclick="show('acts')">Sesiones</div>
   <div class="tab" onclick="show('hawaii')">Hawaii</div>
 </div>
+
 <div id="recovery" class="sec a"><div id="rc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
 <div id="fitness"  class="sec"><div id="fc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
 <div id="volume"   class="sec"><div id="vc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
@@ -123,7 +171,7 @@ body{background:var(--ink);color:var(--txt);font-family:'Space Grotesk',sans-ser
 const SU='https://ooziprpnyoorifmemser.supabase.co';
 const AK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemlwcnBueW9vcmlmbWVtc2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTQ5MjksImV4cCI6MjA5NDE3MDkyOX0.Lrn4NkZYhhDNaJ0mwqhobp6xpNCRKe7--oZGO25VWMw';
 const H={apikey:AK,'Authorization':'Bearer '+AK};
-let S={rm:null,ad:null,fit:[],acts:[],rmAll:[],loaded:false,td:''};
+let S={rm:null,ad:null,fit:[],acts:[],rmAll:[],rmHist:[],loaded:false,td:''};
 let FR='3m';
 
 const n=v=>{const x=Number(v);return(isNaN(x)||x===0)?null:x};
@@ -131,81 +179,307 @@ const fmt=(v,s='')=>v!==null&&v!==undefined?`${v}${s}`:'<span class="na">—</sp
 const fmtH=m=>{if(!m)return'<span class="na">—</span>';return`${Math.floor(m/60)}h${String(Math.round(m%60)).padStart(2,'0')}m`};
 const td=()=>new Date().toISOString().slice(0,10);
 const dAgo=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
-const rcC=c=>c==='verde'?'var(--teal)':c==='amarillo'?'var(--amber)':'var(--rose)';
-const rcK=c=>c==='verde'?'ct':c==='amarillo'?'ca':'cr';
-const rcE=c=>c==='verde'?'🟢':c==='amarillo'?'🟡':'🔴';
+const rcC=c=>(c==='verde'||c==='green')?'var(--teal)':(c==='amarillo'||c==='yellow')?'var(--amber)':'var(--rose)';
+const rcK=c=>(c==='verde'||c==='green')?'ct':(c==='amarillo'||c==='yellow')?'ca':'cr';
+const rcE=c=>(c==='verde'||c==='green')?'🟢':(c==='amarillo'||c==='yellow')?'🟡':'🔴';
 const si=t=>({Swim:'🏊',Ride:'🚴',VirtualRide:'🚴',Run:'🏃',VirtualRun:'🏃',WeightTraining:'🏋️',Yoga:'🧘',TrailRun:'⛰️',Walk:'🚶'}[t]||'⚡');
 const sc=t=>['Swim'].includes(t)?'var(--blue)':['Ride','VirtualRide'].includes(t)?'var(--amber)':['Run','VirtualRun','TrailRun'].includes(t)?'var(--teal)':'var(--violet)';
 const sn=t=>({Swim:'Natación',Ride:'Ciclismo',VirtualRide:'Ciclismo',Run:'Carrera',VirtualRun:'Cinta',WeightTraining:'Fuerza',Yoga:'Yoga',TrailRun:'Trail'}[t]||t);
 
 function ring(p,col,sz,sw,inner){
   const r=(sz-sw)/2,c=2*Math.PI*r,f=(Math.min(p||0,100)/100)*c;
-  return`<div class="rw" style="width:${sz}px;height:${sz}px"><svg class="rs" width="${sz}" height="${sz}"><circle class="rb" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}"/><circle class="ra" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}" style="stroke:${col}" stroke-dasharray="${f.toFixed(1)} ${c.toFixed(1)}"/></svg><div class="ri">${inner}</div></div>`;
+  return`<div class="rw" style="width:${sz}px;height:${sz}px"><svg class="rs" width="${sz}" height="${sz}"><circle class="rb2" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}"/><circle class="ra" cx="${sz/2}" cy="${sz/2}" r="${r}" stroke-width="${sw}" style="stroke:${col}" stroke-dasharray="${f.toFixed(1)} ${c.toFixed(1)}"/></svg><div class="ri">${inner}</div></div>`;
 }
 function bar(p,col){return`<div class="bar"><div class="bf" style="width:${Math.min(100,p||0)}%;background:${col}"></div></div>`}
 
-function iHRV(v,b,acts7){
-  if(!v)return'Intervals aún no sincronizó — disponible después de las 9am.';
+// ── INSIGHTS PROFESIONALES ─────────────────────────────────────────────────
+function iHRV(v,b,acts7,rc){
+  if(!v)return'Intervals aún no sincronizó — disponible después de las 9am. Revisa que el Garmin esté sincronizado con la app.';
   const d=((v-b)/b)*100;
   const heavy=acts7.filter(a=>new Date(a.fecha)>=new Date(Date.now()-86400000)&&(a.tss||0)>100);
-  const ctx=heavy.length?` Sesión intensa ayer (TSS ${heavy.reduce((s,a)=>s+(a.tss||0),0)}).`:'';
-  if(d>=15)return`↑ ${d.toFixed(0)}% sobre baseline.${ctx} SNA muy recuperado. Día ideal para carga alta.`;
-  if(d>=5)return`↑ ${d.toFixed(0)}% sobre baseline. Buena recuperación.${ctx} Verde para entrenar.`;
-  if(d>=-5)return`En baseline (${b} ms). Recuperación normal.${ctx}`;
-  if(d>=-15)return`↓ ${Math.abs(d).toFixed(0)}% bajo baseline.${ctx} Máximo Z2 hoy. Prioriza sueño.`;
-  return`↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA bajo estrés.${ctx} Descanso activo.`;
+  const mod=acts7.filter(a=>new Date(a.fecha)>=new Date(Date.now()-86400000)&&(a.tss||0)>50&&(a.tss||0)<=100);
+  const hTSS=heavy.reduce((s,a)=>s+(a.tss||0),0);
+  let ctx='',rec='';
+  if(heavy.length)ctx=` Sesión de alta intensidad ayer (TSS ${hTSS}) suprime el SNA hasta 24-48h — es normal y esperado.`;
+  else if(mod.length)ctx=` Entreno moderado ayer puede bajar el HRV levemente.`;
+  if(d>=20){rec='Ventana anabólica óptima. Aprovecha para intervalos de alta intensidad, trabajo de umbral o sesión larga. El cuerpo está en capacidad de absorber carga.';return`↑↑ ${d.toFixed(0)}% sobre baseline.${ctx} ${rec}`}
+  if(d>=10){rec='SNA bien recuperado. Día para entrenar con calidad — buena tolerancia a intensidad alta.';return`↑ ${d.toFixed(0)}% sobre baseline.${ctx} ${rec}`}
+  if(d>=3){rec='Recuperación normal. Sigue el plan previsto sin modificaciones.';return`En baseline (${v} ms). ${ctx} ${rec}`}
+  if(d>=-10){rec='Prioriza volumen en Z1-Z2. Evita series de alta intensidad. El SNA parasimpático necesita más tiempo.';return`↓ ${Math.abs(d).toFixed(0)}% bajo baseline.${ctx} ${rec}`}
+  if(d>=-20){rec='Descarga activa: trote suave 30-45 min, movilidad, trabajo de respiración. No añadas estrés adicional.';return`↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. SNA bajo estrés significativo.${ctx} ${rec}`}
+  return`↓↓↓ ${Math.abs(d).toFixed(0)}% bajo baseline. Señal de sobreentrenamiento, enfermedad o estrés agudo.${ctx} Reposo total. Si persiste >3 días, consulta con médico deportivo.`;
 }
+
 function iRHR(v,b){
-  if(!v)return'Sin dato de FC reposo.';
+  if(!v)return'FC reposo viene de Intervals.icu (sincronizado desde Garmin). Si no aparece, verifica la sincronización en la app.';
   const d=v-b;
-  if(d<=-4)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón muy eficiente. Señal positiva.`;
-  if(d<=2)return`Normal (${v} bpm, base ${b} bpm). Sin alarmas.`;
-  if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga o deshidratación.`;
-  if(d<=8)return`+${d.toFixed(0)} bpm. Fatiga significativa. Revisa carga y descanso.`;
-  return`+${d.toFixed(0)} bpm. Reduce intensidad. Posible inicio de enfermedad.`;
+  if(d<=-5)return`${Math.abs(d).toFixed(0)} bpm bajo tu base (${b} bpm). Adaptación cardiovascular positiva: mayor volumen sistólico, mejor eficiencia. El corazón bombea más sangre por latido.`;
+  if(d<=-3)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón eficiente. Señal de buena recuperación y adaptación cardiovascular progresiva.`;
+  if(d<=2)return`Normal (${v} bpm ±${Math.abs(d)} de base). Sin alarmas. Sistema autónomo equilibrado.`;
+  if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga acumulada, deshidratación o estrés. Hidrata bien (35ml/kg peso). Si persiste mañana, reduce carga.`;
+  if(d<=8)return`+${d.toFixed(0)} bpm sobre base. Fatiga cardiovascular significativa. Verifica hidratación, calidad de sueño y carga de los últimos 7 días. Prioriza descanso.`;
+  if(d<=12)return`+${d.toFixed(0)} bpm sobre base. Señal de alerta: sobreentrenamiento, inicio de enfermedad o estrés agudo. Reduce carga al 50% y monitorea 24-48h.`;
+  return`+${d.toFixed(0)} bpm sobre base. Señal crítica. Posible enfermedad, sobreentrenamiento severo o estímulo estresante externo. Reposo y evaluación médica.`;
 }
+
 function iSlp(v,h,nd){
-  if(!v)return'Sin datos de sueño disponibles.';
-  const def=h&&nd?(nd/60-h).toFixed(1):null;
-  let rec=def&&Number(def)>0.5?` Necesitas ${(nd/60).toFixed(1)}h esta noche.`:def&&Number(def)<=0?' Cuota cumplida.':'';
-  if(v>=90)return`Excepcional (${v}%). Recovery maximizado.${rec}`;
-  if(v>=80)return`Excelente (${v}%).${rec}`;
-  if(v>=70)return`Bueno (${v}%). Margen en sueño profundo.${rec}`;
-  if(v>=55)return`Regular (${v}%).${rec} Acuéstate 30 min antes esta noche.`;
-  return`Insuficiente (${v}%).${rec} Oscuridad total, 18°C, sin pantallas 1h antes.`;
+  if(!v)return'Sin datos de sueño. Verifica que el Garmin esté puesto al dormir y sincronizado con la app antes de las 9am.';
+  const need=nd?(nd/60).toFixed(1):null;
+  const def=h&&nd?(nd/60-h):0;
+  let rec=def>0.5?` Esta noche necesitas ${need}h — no menos.`:def<=0?' Cuota cumplida. Mantén el horario.':'';
+  if(v>=92)return`Sueño de élite (${v}%). Maximiza el beneficio: el cuerpo libera hormona de crecimiento principalmente en sueño profundo y procesa adaptaciones del entrenamiento.${rec}`;
+  if(v>=82)return`Sueño excelente (${v}%). Procesos de recuperación muscular y consolidación neuromuscular óptimos. Aprovecha para sesiones técnicas.${rec}`;
+  if(v>=72)return`Buen sueño (${v}%). Margen de mejora: más sueño profundo mejora la síntesis proteica y recuperación. Prueba acostarte 20-30 min antes.${rec}`;
+  if(v>=60)return`Sueño regular (${v}%). Impacto en recuperación: menor tolerancia a la intensidad, mayor percepción de esfuerzo. Oscuridad total, temperatura 17-19°C, sin pantallas 1h antes.${rec}`;
+  if(v>=48)return`Sueño insuficiente (${v}%). Evidencia científica: menos de 7h aumenta riesgo de lesión 1.7x, eleva cortisol y reduce síntesis proteica. Prioriza sueño sobre cualquier sesión de entrenamiento.${rec}`;
+  return`Sueño crítico (${v}%). Déficit severo: no compenses con cafeína. El entrenamiento con este nivel de sueño es contraproducente y aumenta riesgo de lesión. Descansa primero.${rec}`;
 }
-function iResp(v){
-  if(!v)return'Ingresa resp:XX en Intervals → Bienestar → Comments cada mañana.';
-  if(v<=12)return`${v} brpm. Bajo lo normal. Monitorear.`;
-  if(v<=16)return`${v} brpm. Normal (óptimo 12-16). Sin alarmas.`;
-  if(v<=19)return`${v} brpm. Levemente elevado. Posible estrés.`;
-  return`${v} brpm. Elevado. Señal de estrés fisiológico.`;
+
+function iResp(v,hist){
+  if(!v)return'Ingresa resp:XX en Intervals → Bienestar → Comments cada mañana. La frecuencia respiratoria nocturna es indicador temprano de enfermedad y sobreentrenamiento.';
+  const bl=hist&&hist.length>3?hist.filter(h=>h.resp_rate).map(h=>Number(h.resp_rate)).filter(Boolean):null;
+  const blMean=bl&&bl.length?Math.round(bl.reduce((a,b)=>a+b,0)/bl.length*10)/10:null;
+  const ctx=blMean?` Tu media personal: ${blMean} brpm.`:'';
+  if(v<=11)return`${v} brpm.${ctx} Muy bajo. Puede indicar sueño muy profundo (positivo) o calibración del sensor.`;
+  if(v<=14)return`${v} brpm.${ctx} Excelente. Rango óptimo para triatletas de élite (12-14 brpm). Sistema cardiorrespiratorio muy eficiente.`;
+  if(v<=16)return`${v} brpm.${ctx} Normal. Rango fisiológico estándar. Sin alarmas.`;
+  if(v<=18)return`${v} brpm.${ctx} Levemente elevado. Posible fatiga acumulada, estrés o inicio de enfermedad. Monitorea los próximos días.`;
+  if(v<=21)return`${v} brpm.${ctx} Elevado. Señal de estrés fisiológico: puede preceder síntomas de resfriado/gripe 24-48h antes. Reduce carga y descansa.`;
+  return`${v} brpm.${ctx} Muy elevado. Señal de alarma: enfermedad activa, sobreentrenamiento o estrés agudo. Reposo y evaluación.`;
 }
+
+function iRecovery(score,rc,hrv,rhr,slp){
+  if(!score)return'';
+  if(score>=80)return`Recovery óptimo (${score}%). El cuerpo está en estado parasimpático dominante — máxima capacidad de absorber carga de entrenamiento. Ideal para sesión de calidad o carga alta.`;
+  if(score>=67)return`Bien recuperado (${score}%). Capaz de entrenar con normalidad. Prioriza sesiones planificadas de mayor intensidad dentro de lo programado.`;
+  if(score>=50)return`Recuperación moderada (${score}%). Entrena pero ajusta expectativas: puede requerir más RPE para la misma carga. Zona 2 segura, threshold con precaución.`;
+  if(score>=34)return`Recuperación baja (${score}%). Cuerpo bajo estrés fisiológico. Prioriza Z1-Z2. Si el plan indica sesión intensa, consideras posponerla o reducir volumen al 60%.`;
+  return`Recovery crítico (${score}%). El entrenamiento hoy podría ser contraproducente: mayor riesgo de lesión, sobreentrenamiento y supresión inmune. Descansa. El descanso también es entrenamiento.`;
+}
+
 function iTSB(t){
   if(t===null)return'';
-  if(t>25)return'🌟 Muy fresco. Ideal para competir o test.';
-  if(t>10)return'✅ Fresco. Buenas condiciones para calidad.';
-  if(t>-5)return'🎯 Zona óptima Ironman. Listo para competir.';
-  if(t>-15)return'⚡ Fatiga moderada. Normal en bloque.';
-  if(t>-30)return'⚠️ Fatiga alta. Monitorea señales.';
-  return'🔴 Fatiga muy alta. Considera semana de recuperación.';
+  if(t>30)return'🌟 Muy fresco (TSB>30). Máxima capacidad competitiva. Ideal para A-race o test de rendimiento. Si no hay competencia, añade carga.';
+  if(t>15)return'✅ Fresco (15-30). Excelentes condiciones para sesiones de calidad, series y trabajo de umbral.';
+  if(t>5)return'💪 Forma positiva (5-15). Buen estado para competir o sesiones de calidad. Zona ideal pre-carrera.';
+  if(t>-5)return'🎯 Zona neutra (-5 a 5). Balance entre fitness y fatiga. Zona óptima para Ironman race day.';
+  if(t>-15)return'⚡ Fatiga moderada (-15 a -5). Normal en bloque de entrenamiento. El fitness está subiendo. Sigue el plan.';
+  if(t>-25)return'⚠️ Fatiga alta (-25 a -15). Monitorea señales de sobreentrenamiento: HRV, FC reposo, motivación. Considera semana de carga reducida.';
+  if(t>-35)return'🔴 Fatiga muy alta (-35 a -25). Zona de riesgo. Prioriza recuperación. Una semana de descarga aquí previene semanas de lesión.';
+  return'🚨 Fatiga extrema (>35). Señal de alerta máxima. Semana de recuperación obligatoria. Consulta con entrenador.';
 }
 
+// ── DEFINICIONES DE MÉTRICAS ───────────────────────────────────────────────
+const DEFS = {
+  recovery: {
+    title:'Recovery Score',
+    color:'var(--teal)',
+    def:`<b>Qué es:</b> Índice compuesto 0-100 que mide la capacidad del cuerpo de absorber y adaptarse al entrenamiento. Calculado con algoritmo idéntico a WHOOP.<br><br>
+<b>Cómo se calcula:</b><br>
+• HRV (lnRMSSD) → 50% del score, z-score vs baseline 28 días<br>
+• FC Reposo → 25%, menor = mejor<br>
+• Sleep Score → 25%<br>
+• Respiración → 10% si disponible (reemplaza parte de sueño)<br>
+• Pesos dinámicos: si HRV cae >15%, su peso sube a 60%<br><br>
+<b>Zonas:</b> 🟢 ≥67% Bien recuperado · 🟡 34-66% Mantenimiento · 🔴 &lt;34% Descansa<br><br>
+<b>¿Por qué importa?</b> El entrenamiento sin recuperación adecuada produce adaptaciones negativas: sobreentrenamiento, lesiones, supresión inmune. El recovery score te dice cuándo tu cuerpo puede absorber más carga y cuándo necesita descanso.`,
+    keys:['recovery_score','hrv_hoy','fc_reposo_hoy','sleep_perf_pct'],
+    labels:['Recovery','HRV ms','FC Rep.','Sleep%'],
+    colors:['var(--teal)','var(--teal)','var(--blue)','var(--violet)']
+  },
+  hrv: {
+    title:'HRV · Variabilidad Cardíaca',
+    color:'var(--teal)',
+    def:`<b>Qué es:</b> Variación en milisegundos entre latidos consecutivos. Refleja el balance del sistema nervioso autónomo (SNA). Mayor HRV = mayor dominio parasimpático = mayor capacidad de recuperación.<br><br>
+<b>Cómo se mide:</b> rMSSD nocturno (Garmin vía Intervals). Se usa lnRMSSD para mayor estabilidad estadística.<br><br>
+<b>Tu baseline:</b> Media móvil 28 días. WHOOP usa 30 días — estamos muy cerca.<br><br>
+<b>¿Por qué baja el HRV?</b> Entrenamiento intenso, alcohol, mala calidad de sueño, enfermedad, estrés psicológico, deshidratación, viaje con cambio de zona horaria.<br><br>
+<b>¿Por qué sube?</b> Descanso, sueño de calidad, buena nutrición, adaptación al entrenamiento a largo plazo.<br><br>
+<b>Rango esperado para triatleta élite Age Group:</b> 38-60 ms. Tu baseline: ~39 ms.`,
+    keys:['hrv_hoy','hrv_baseline'],
+    labels:['HRV ms','Baseline ms'],
+    colors:['var(--teal)','var(--faint)']
+  },
+  rhr: {
+    title:'FC Reposo',
+    color:'var(--blue)',
+    def:`<b>Qué es:</b> Frecuencia cardíaca mínima mientras duermes o al despertar. Refleja la eficiencia cardiovascular y nivel de recuperación.<br><br>
+<b>Cómo se mide:</b> Garmin la detecta durante el sueño más profundo. Intervals la recibe automáticamente.<br><br>
+<b>¿Por qué sube?</b> Fatiga acumulada, deshidratación (-1-3% del peso corporal puede elevar FC 3-5 bpm), enfermedad, alcohol (eleva FC reposo hasta 4 días post consumo), estrés crónico.<br><br>
+<b>¿Por qué baja?</b> Adaptación cardiovascular al entrenamiento aeróbico sostenido. Triatletas élite pueden llegar a 35-42 bpm. Tu baseline: ~55 bpm.<br><br>
+<b>Regla práctica:</b> Si está >7 bpm sobre tu baseline, considera descanso o sesión muy suave.`,
+    keys:['fc_reposo_hoy','fc_reposo_baseline'],
+    labels:['FC bpm','Baseline bpm'],
+    colors:['var(--blue)','var(--faint)']
+  },
+  sleep: {
+    title:'Sueño · Sleep Performance',
+    color:'var(--violet)',
+    def:`<b>Qué es:</b> Score 0-100 de calidad del sueño combinando suficiencia, arquitectura de fases y eficiencia.<br><br>
+<b>Fases del sueño y su rol:<br></b>
+• <b>Sueño profundo (N3):</b> Recuperación física, síntesis de hormona de crecimiento, reparación muscular. Objetivo: ≥20% del total.<br>
+• <b>REM:</b> Consolidación de memoria motora (aprendizaje técnico), regulación emocional. Objetivo: ≥25%.<br>
+• <b>Sueño ligero (N1-N2):</b> Transición y preparación. Normal: 50-60%.<br><br>
+<b>¿Qué afecta la calidad?</b> Alcohol (suprime REM), temperatura >20°C (dificulta sueño profundo), pantallas (retrasan melatonina), cafeína >14h antes, variabilidad de horario.<br><br>
+<b>Necesidad mínima para atleta:</b> 8-9h. El déficit es acumulativo — no se recupera en un fin de semana.`,
+    keys:['horas_sueno','sleep_perf_pct'],
+    labels:['Horas','Score %'],
+    colors:['var(--violet)','var(--violet)']
+  },
+  resp: {
+    title:'Frecuencia Respiratoria',
+    color:'var(--lime)',
+    def:`<b>Qué es:</b> Respiraciones por minuto durante el sueño. Indicador temprano y sensible de estrés fisiológico.<br><br>
+<b>Valores de referencia:</b><br>
+• 12-14 brpm: Atleta élite en recuperación óptima<br>
+• 14-16 brpm: Normal<br>
+• 16-19 brpm: Levemente elevado, monitorear<br>
+• >19 brpm: Señal de alerta — enfermedad o sobreentrenamiento<br><br>
+<b>¿Por qué importa?</b> La frecuencia respiratoria nocturna sube 1-3 días ANTES de que aparezcan síntomas de enfermedad. Es el biomarcador más sensible para detección temprana.<br><br>
+<b>WHOOP la incluye con peso ~15%</b> en el Recovery Score. La medimos manualmente desde Garmin Connect → ingresa en Intervals Comments: <b>resp:14</b>`,
+    keys:['resp_rate'],
+    labels:['Resp brpm'],
+    colors:['var(--lime)']
+  }
+};
+
+// ── MODAL ──────────────────────────────────────────────────────────────────
+function openModal(metricKey){
+  const def=DEFS[metricKey];
+  if(!def)return;
+  const hist=S.rmHist||[];
+  const days=30;
+  const data=hist.slice(0,days).reverse();
+  if(!data.length)return;
+
+  document.getElementById('modal-title').textContent=def.title;
+
+  // Build mini chart for this metric
+  const key0=def.keys[0];
+  const vals=data.map(d=>Number(d[key0])||0);
+  const maxV=Math.max(...vals,1),minV=Math.min(...vals.filter(v=>v>0));
+
+  const W=340,H=100,PL=32,PR=8,PT=8,PB=20,cw=W-PL-PR,ch=H-PT-PB;
+  const validData=data.filter(d=>Number(d[key0])>0);
+  if(!validData.length){document.getElementById('modal-body').innerHTML=`<div class="metric-def" style="border-color:${def.color}22">${def.def}</div><div class="loader" style="padding:20px">Sin historial disponible</div>`;document.getElementById('modal').classList.add('open');return;}
+
+  const xs=i=>(i/(validData.length-1||1))*cw+PL;
+  const ys=v=>ch-(((v-minV)/(maxV-minV||1))*ch)+PT;
+  const path=validData.map((d,i)=>`${i?'L':'M'}${xs(i).toFixed(1)} ${ys(Number(d[key0])).toFixed(1)}`).join(' ');
+  const area=path+` L${xs(validData.length-1).toFixed(1)} ${H-PB} L${xs(0).toFixed(1)} ${H-PB} Z`;
+
+  // Baseline line if exists
+  let blLine='';
+  const key1=def.keys[1];
+  if(key1&&validData[validData.length-1][key1]){
+    const blVal=Number(validData[validData.length-1][key1]);
+    const blY=ys(blVal);
+    blLine=`<line x1="${PL}" y1="${blY.toFixed(1)}" x2="${W-PR}" y2="${blY.toFixed(1)}" stroke="${def.color}" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3,2"/>`;
+  }
+
+  const xlbl=validData.filter((_,i)=>i===0||i===Math.floor(validData.length/2)||i===validData.length-1).map((d,_,arr)=>{
+    const i=validData.indexOf(d);
+    return`<text x="${xs(i).toFixed(1)}" y="${H-4}" text-anchor="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${d.fecha.slice(5)}</text>`;
+  }).join('');
+  const ylbl=[minV,maxV].map(v=>`<text x="${PL-4}" y="${ys(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${Math.round(v)}</text>`).join('');
+
+  // Range buttons for modal
+  const rangeBtns=['14d','30d','60d','90d'].map(r=>`<span class="rb3${r==='30d'?' a':''}" onclick="updateModalChart('${metricKey}','${r}',this)">${r}</span>`).join('');
+
+  // Table
+  const tableRows=validData.slice().reverse().slice(0,15).map(d=>{
+    const val=Number(d[key0]);
+    const bl=key1?Number(d[key1]):null;
+    const diff=bl&&val?((val-bl)/bl*100).toFixed(0):null;
+    return`<tr>
+      <td>${d.fecha.slice(5)}</td>
+      <td style="color:${def.color};font-weight:600">${val?val.toFixed(val>10?0:1):'—'}</td>
+      ${bl?`<td style="color:var(--faint)">${bl.toFixed(bl>10?1:2)}</td>`:''}
+      ${diff!==null?`<td style="color:${Number(diff)>0?(key0==='fc_reposo_hoy'?'var(--rose)':'var(--teal)'):(key0==='fc_reposo_hoy'?'var(--teal)':'var(--rose)')}">${Number(diff)>0?'+':''}${diff}%</td>`:''}
+      <td>${rcE(d.recovery_color)} ${d.recovery_score??'—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML=`
+<div class="metric-def" style="border-color:${def.color}22">${def.def}</div>
+<div style="margin-bottom:8px;display:flex;gap:4px;align-items:center;justify-content:space-between">
+  <span style="font-size:9px;color:var(--soft);font-family:'Space Mono',monospace">Últimos 30 días</span>
+  <div class="rbs">${rangeBtns}</div>
+</div>
+<div class="cw" id="modal-chart-wrap">
+  <svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${def.color}" stop-opacity=".3"/>
+        <stop offset="100%" stop-color="${def.color}" stop-opacity=".02"/>
+      </linearGradient>
+    </defs>
+    ${blLine}
+    <path d="${area}" fill="url(#mg)"/>
+    <path d="${path}" fill="none" stroke="${def.color}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${xs(validData.length-1).toFixed(1)}" cy="${ys(Number(validData[validData.length-1][key0])).toFixed(1)}" r="3" fill="${def.color}"/>
+    ${xlbl}${ylbl}
+  </svg>
+</div>
+<table class="ht" id="modal-table">
+  <thead><tr><th>Fecha</th><th>${def.labels[0]}</th>${key1?`<th>${def.labels[1]||'Base'}</th>`:''}${key1?'<th>Δ%</th>':''}<th>Recovery</th></tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function updateModalChart(metricKey,range,btn){
+  document.querySelectorAll('#modal-body .rb3').forEach(b=>b.classList.remove('a'));
+  btn.classList.add('a');
+  const days=range==='14d'?14:range==='30d'?30:range==='60d'?60:90;
+  const def=DEFS[metricKey];
+  const hist=S.rmHist||[];
+  const data=hist.slice(0,days).reverse().filter(d=>Number(d[def.keys[0]])>0);
+  if(!data.length)return;
+  const key0=def.keys[0],key1=def.keys[1];
+  const vals=data.map(d=>Number(d[key0])||0);
+  const maxV=Math.max(...vals,1),minV=Math.min(...vals.filter(v=>v>0));
+  const W=340,H=100,PL=32,PR=8,PT=8,PB=20,cw=W-PL-PR,ch=H-PT-PB;
+  const xs=i=>(i/(data.length-1||1))*cw+PL;
+  const ys=v=>ch-(((v-minV)/(maxV-minV||1))*ch)+PT;
+  const path=data.map((d,i)=>`${i?'L':'M'}${xs(i).toFixed(1)} ${ys(Number(d[key0])).toFixed(1)}`).join(' ');
+  const area=path+` L${xs(data.length-1).toFixed(1)} ${H-PB} L${xs(0).toFixed(1)} ${H-PB} Z`;
+  let blLine='';
+  if(key1&&data[data.length-1][key1]){const blVal=Number(data[data.length-1][key1]);const blY=ys(blVal);blLine=`<line x1="${PL}" y1="${blY.toFixed(1)}" x2="${W-PR}" y2="${blY.toFixed(1)}" stroke="${def.color}" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3,2"/>`;}
+  const xlbl=data.filter((_,i)=>i===0||i===Math.floor(data.length/2)||i===data.length-1).map(d=>{const i=data.indexOf(d);return`<text x="${xs(i).toFixed(1)}" y="${H-4}" text-anchor="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${d.fecha.slice(5)}</text>`}).join('');
+  const ylbl=[minV,maxV].map(v=>`<text x="${PL-4}" y="${ys(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#3a3a55" font-size="8" font-family="Space Mono">${Math.round(v)}</text>`).join('');
+  document.getElementById('modal-chart-wrap').innerHTML=`<svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${def.color}" stop-opacity=".3"/><stop offset="100%" stop-color="${def.color}" stop-opacity=".02"/></linearGradient></defs>${blLine}<path d="${area}" fill="url(#mg2)"/><path d="${path}" fill="none" stroke="${def.color}" stroke-width="2" stroke-linejoin="round"/><circle cx="${xs(data.length-1).toFixed(1)}" cy="${ys(Number(data[data.length-1][key0])).toFixed(1)}" r="3" fill="${def.color}"/>${xlbl}${ylbl}</svg>`;
+  const tableRows=data.slice().reverse().slice(0,15).map(d=>{const val=Number(d[key0]);const bl=key1?Number(d[key1]):null;const diff=bl&&val?((val-bl)/bl*100).toFixed(0):null;return`<tr><td>${d.fecha.slice(5)}</td><td style="color:${def.color};font-weight:600">${val?val.toFixed(val>10?0:1):'—'}</td>${bl?`<td style="color:var(--faint)">${bl.toFixed(bl>10?1:2)}</td>`:''}${diff!==null?`<td style="color:${Number(diff)>0?(key0==='fc_reposo_hoy'?'var(--rose)':'var(--teal)'):(key0==='fc_reposo_hoy'?'var(--teal)':'var(--rose)')}">${Number(diff)>0?'+':''}${diff}%</td>`:''}<td>${rcE(d.recovery_color)} ${d.recovery_score??'—'}</td></tr>`;}).join('');
+  document.getElementById('modal-table').querySelector('tbody').innerHTML=tableRows;
+}
+
+function closeModal(e){if(e.target.id==='modal')document.getElementById('modal').classList.remove('open')}
+
+// ── DATA ───────────────────────────────────────────────────────────────────
 async function qS(t,p=''){const r=await fetch(`${SU}/rest/v1/${t}?${p}`,{headers:H});return r.json()}
 
-async function loadAll(){
+async function syncAll(){
   const btn=document.getElementById('sb');
   btn.textContent='...';
+  // Solo recargamos datos desde Supabase (las edge functions corren por cron automáticamente)
+  S.loaded=false;
+  await loadAll(true);
+  btn.textContent='↻ SYNC';
+}
+
+async function loadAll(forceRefresh=false){
+  if(S.loaded&&!forceRefresh){return}
   try{
     const today=td();
-    const [rmAll,adR,fitR,actsR]=await Promise.all([
+    const [rmAll,rmHist,adR,fitR,actsR]=await Promise.all([
       qS('recovery_metrics','order=fecha.desc&limit=14&select=*'),
+      qS('recovery_metrics','order=fecha.desc&limit=90&select=fecha,hrv_hoy,fc_reposo_hoy,horas_sueno,sleep_perf_pct,resp_rate,recovery_score,recovery_color,hrv_baseline,fc_reposo_baseline'),
       qS('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb`),
       qS('fitness_diario','order=fecha.asc&select=fecha,ctl,atl,tsb'),
       qS('actividades','order=fecha.desc&limit=50&select=*')
     ]);
     const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
-    S={rm,ad:adR[0]||{},fit:Array.isArray(fitR)?fitR:[],acts:Array.isArray(actsR)?actsR:[],rmAll,loaded:true,td:today};
+    S={rm,ad:adR[0]||{},fit:Array.isArray(fitR)?fitR:[],acts:Array.isArray(actsR)?actsR:[],rmAll,rmHist:Array.isArray(rmHist)?rmHist:[],loaded:true,td:today};
     rRec();rFit(FR);rVol();rAct();rHW();
   }catch(e){
     ['rc','fc','vc','ac','hc'].forEach(id=>{
@@ -213,9 +487,9 @@ async function loadAll(){
       if(el)el.innerHTML=`<div class="loader" style="color:var(--rose)">Error: ${e.message}</div>`;
     });
   }
-  btn.textContent='↻ SYNC';
 }
 
+// ── RENDER RECOVERY ────────────────────────────────────────────────────────
 function rRec(){
   const {rm,ad,acts,td,rmAll}=S;
   const isToday=rm.fecha===td;
@@ -226,76 +500,110 @@ function rRec(){
   const sh=n(rm.horas_sueno),sp=n(rm.sleep_perf_pct),sn2=n(rm.sleep_need_min),rsp=n(rm.resp_rate);
   const ctl=n(ad.ctl),atl=n(ad.atl),tsb=n(ad.tsb);
   const acts7=acts.filter(a=>new Date(a.fecha)>=new Date(Date.now()-7*86400000));
-  const slpRing=sp!==null?ring(sp,'var(--violet)',68,8,`<span style="font-size:14px;font-weight:700;font-family:'Space Mono',monospace;color:var(--violet)">${Math.round(sp)}</span>`):'';
+  const slpRing=sp!==null?ring(sp,'var(--violet)',64,8,`<span style="font-size:13px;font-weight:700;font-family:'Space Mono',monospace;color:var(--violet)">${Math.round(sp)}</span>`):'';
 
   document.getElementById('rc').innerHTML=`
-<div class="hero" style="border-color:${rcol}44">
-  ${ring(rs,rcol,108,11,`<span class="rn ${rk}">${rs}</span><span class="ru">%</span>`)}
+<!-- HERO RECOVERY — button para touch nativo -->
+<button class="hero" style="border-color:${rcol}44;width:calc(100% - 24px);text-align:left" onclick="openModal('recovery')">
+  ${ring(rs,rcol,104,11,`<span class="rn ${rk}">${rs}</span><span class="ru">%</span>`)}
   <div class="hr">
     <div class="hl">Recovery Score</div>
-    <div class="hs ${rk}">${rcE(rc)} ${rc.charAt(0).toUpperCase()+rc.slice(1)}</div>
+    <div class="hs ${rk}">${rcE(rc)} ${rc==='verde'||rc==='green'?'Bien recuperado':rc==='amarillo'||rc==='yellow'?'Mantenimiento':'Descansa'}</div>
     <div class="hp">
-      <span class="pi pg">HRV ${n(rm.hrv_score)??'—'}%</span>
-      <span class="pi pb">FCR ${n(rm.fc_reposo_score)??'—'}%</span>
-      <span class="pi pv">Sueño ${n(rm.sleep_score)??'—'}%</span>
-      ${rsp?`<span class="pi pa">Resp ${n(rm.resp_score)??'—'}%</span>`:''}
+      <button class="pi pg" onclick="event.stopPropagation();openModal('hrv')">HRV ${n(rm.hrv_score)??'—'}%</button>
+      <button class="pi pb" onclick="event.stopPropagation();openModal('rhr')">FCR ${n(rm.fc_reposo_score)??'—'}%</button>
+      <button class="pi pv" onclick="event.stopPropagation();openModal('sleep')">Sueño ${n(rm.sleep_score)??'—'}%</button>
+      ${rsp?`<button class="pi pa" onclick="event.stopPropagation();openModal('resp')">Resp ${n(rm.resp_score)??'—'}%</button>`:''}
     </div>
     ${!isToday?`<div class="stale">⏱ Datos del ${(rm.fecha||'').slice(5)} · sync 9am</div>`:''}
+    <div class="tap-hint">Toca para historial →</div>
   </div>
+</button>
+
+<!-- Insight recovery -->
+<div class="card" style="border-color:${rcol}33">
+  <div class="chd">🧠 Análisis de Nyso</div>
+  <div class="ins" style="border-color:${rcol}">${iRecovery(rs,rc,hv,rv,sp)}</div>
+  ${ctl!==null?`<div class="ins" style="border-color:var(--blue);margin-top:8px">${iTSB(tsb)}<br><span style="font-size:10px;font-family:'Space Mono',monospace;color:var(--faint)">CTL ${ctl.toFixed(0)} · ATL ${atl.toFixed(0)} · TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}</span></div>`:''}
 </div>
 
-${ctl!==null?`<div class="ab ${tsb>10?'ag':tsb<-20?'ar':'aw'}">${iTSB(tsb)} CTL ${ctl.toFixed(0)} | ATL ${atl.toFixed(0)} | TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}</div>`:''}
-
-<div class="card" style="border-color:${hv&&hv>hb?'#00e5c828':'var(--edge)'}">
-  <div class="chd">💓 HRV · Variabilidad Cardíaca <span style="color:var(--faint)">lnRMSSD · 28d</span></div>
-  <div class="ml">Anoche · base ${hb} ms</div>
-  <div class="mv ct">${fmt(hv,' ms')}</div>
-  ${hv?bar(Math.min(130,Math.round(hv/hb*100)),'var(--teal)'):''}
-  <div class="ins" style="border-color:var(--teal)">${iHRV(hv,hb,acts7)}</div>
-</div>
-
-<div class="card">
-  <div class="chd">❤️ FC Reposo <span style="color:var(--faint)">Intervals.icu</span></div>
-  <div class="ml">Hoy · base ${rb} bpm</div>
-  <div class="mv cb">${fmt(rv,' bpm')}</div>
-  ${rv?bar(Math.min(110,Math.round(rb/rv*100)),'var(--blue)'):''}
-  <div class="ins" style="border-color:var(--blue)">${iRHR(rv,rb)}</div>
-</div>
-
-<div class="card">
-  <div class="chd">🌙 Sueño <span style="color:var(--faint)">${sh?sh.toFixed(1)+'h':'sin dato'}</span></div>
-  <div style="display:flex;align-items:flex-start;gap:14px">
-    ${slpRing}
+<!-- HRV -->
+<button class="mc" onclick="openModal('hrv')" style="width:calc(100% - 24px);text-align:left;border-color:${hv&&hv>hb?'#00e5c828':'var(--edge)'}">
+  <div class="mc-row">
     <div style="flex:1">
-      <div class="ml">Sleep Performance</div>
-      <div class="mv cv2" style="font-size:19px;margin-top:2px">${sp?Math.round(sp)+'%':'—'}</div>
-      <div class="ins" style="border-color:var(--violet);margin-top:7px">${iSlp(sp,sh,sn2)}</div>
-      ${sn2?`<div style="font-size:10px;color:var(--violet);margin-top:7px;font-family:'Space Mono',monospace">🎯 Esta noche: <b>${fmtH(sn2)}</b></div>`:''}
+      <div class="ml2">💓 HRV · lnRMSSD nocturno</div>
+      <div class="mv ct">${fmt(hv,' ms')}</div>
+      <div class="mbase">Baseline 28d: ${hb} ms</div>
+      ${hv?bar(Math.min(130,Math.round(hv/hb*100)),'var(--teal)'):''}
     </div>
+    <div class="mc-arrow">›</div>
   </div>
-</div>
+  <div class="ins" style="border-color:var(--teal)">${iHRV(hv,hb,acts7,rc)}</div>
+</button>
 
-<div class="card">
-  <div class="chd">🫁 Respiración <span style="color:var(--faint)">Comments Intervals</span></div>
-  <div class="mv cl2">${fmt(rsp,' brpm')}</div>
-  <div class="ins" style="border-color:var(--lime)">${iResp(rsp)}</div>
-</div>
+<!-- FC Reposo -->
+<button class="mc" onclick="openModal('rhr')" style="width:calc(100% - 24px);text-align:left">
+  <div class="mc-row">
+    <div style="flex:1">
+      <div class="ml2">❤️ FC Reposo · Intervals.icu</div>
+      <div class="mv cb">${fmt(rv,' bpm')}</div>
+      <div class="mbase">Baseline 28d: ${rb} bpm</div>
+      ${rv?bar(Math.min(110,Math.round(rb/rv*100)),'var(--blue)'):''}
+    </div>
+    <div class="mc-arrow">›</div>
+  </div>
+  <div class="ins" style="border-color:var(--blue)">${iRHR(rv,rb)}</div>
+</button>
 
+<!-- Sueño -->
+<button class="mc" onclick="openModal('sleep')" style="width:calc(100% - 24px);text-align:left">
+  <div class="mc-row">
+    <div style="flex:1">
+      <div class="ml2">🌙 Sueño · Sleep Performance</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+        ${slpRing}
+        <div>
+          <div class="mv cv2" style="font-size:18px">${sp?Math.round(sp)+'%':'—'}</div>
+          <div class="mbase">${sh?sh.toFixed(1)+'h dormido':'sin dato'} ${sn2?`· necesitas ${fmtH(sn2)}`:''}  </div>
+        </div>
+      </div>
+    </div>
+    <div class="mc-arrow">›</div>
+  </div>
+  <div class="ins" style="border-color:var(--violet);margin-top:8px">${iSlp(sp,sh,sn2)}</div>
+</button>
+
+<!-- Respiración -->
+<button class="mc" onclick="openModal('resp')" style="width:calc(100% - 24px);text-align:left">
+  <div class="mc-row">
+    <div style="flex:1">
+      <div class="ml2">🫁 Respiración nocturna</div>
+      <div class="mv cl2">${fmt(rsp,' brpm')}</div>
+      <div class="mbase">Ingresa en Intervals Comments: resp:XX</div>
+    </div>
+    <div class="mc-arrow">›</div>
+  </div>
+  <div class="ins" style="border-color:var(--lime)">${iResp(rsp,S.rmHist)}</div>
+</button>
+
+<!-- Historial 10d -->
 <div class="card">
   <div class="chd">📈 Recovery · 10 días</div>
-  <div style="display:flex;align-items:flex-end;gap:4px;height:54px;margin-bottom:6px">
+  <div style="display:flex;align-items:flex-end;gap:4px;height:52px;margin-bottom:4px">
     ${rmAll.slice(0,10).reverse().map(h=>{
-      const p=Math.round(((h.recovery_score||0)/100)*54);
+      const p=Math.round(((h.recovery_score||0)/100)*52);
       const col=rcC(h.recovery_color||'amarillo');
       const act=h.fecha===rm.fecha;
-      return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end"><div style="width:100%;height:${Math.max(3,p)}px;background:${col};border-radius:3px 3px 0 0;opacity:${act?1:.5};${act?`box-shadow:0 0 8px ${col}`:''}"></div><span style="font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">${(h.fecha||'').slice(5)}</span></div>`;
+      return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end"><div style="width:100%;height:${Math.max(3,p)}px;background:${col};border-radius:3px 3px 0 0;opacity:${act?1:.5};${act?`box-shadow:0 0 8px ${col}`:''}"></div><span style="font-size:7px;color:var(--faint);font-family:'Space Mono',monospace">${(h.fecha||'').slice(5)}</span></div>`;
     }).join('')}
   </div>
 </div>
-<button class="ref" onclick="loadAll()">↻ Actualizar datos</button>
-<div class="ft">Nyso Coach · algoritmos WHOOP · Intervals.icu<br>Data provided by Garmin®</div>`;
+
+<button class="ref" onclick="syncAll()">↻ Actualizar · busca nuevos entrenos y métricas</button>
+<div class="ft">Nyso Coach · algoritmos WHOOP · Intervals.icu REST · Data provided by Garmin®</div>`;
 }
 
+// ── FITNESS ────────────────────────────────────────────────────────────────
 function rFit(range){
   FR=range;
   const {fit}=S;
@@ -306,7 +614,7 @@ function rFit(range){
   if(!data.length){document.getElementById('fc').innerHTML='<div class="loader">Sin datos en rango</div>';return}
   const lat=data[data.length-1];
   const ctl=lat.ctl,atl=lat.atl,tsb=lat.tsb;
-  const W=360,H=160,PL=36,PR=10,PT=8,PB=22,cw=W-PL-PR,ch=H-PT-PB;
+  const W=360,H=160,PL=36,PR=8,PT=8,PB=22,cw=W-PL-PR,ch=H-PT-PB;
   const all=[...data.map(d=>d.ctl),...data.map(d=>d.atl),...data.map(d=>d.tsb)];
   const minV=Math.min(...all)-5,maxV=Math.max(...all)+5;
   const xs=i=>(i/(data.length-1||1))*cw+PL;
@@ -321,12 +629,12 @@ function rFit(range){
   document.getElementById('fc').innerHTML=`
 <div class="card">
   <div class="chd">📊 Fitness · Fatiga · Forma
-    <div class="rbs">${['1m','45d','3m','6m','1y'].map(r=>`<span class="rb2${r===range?' a':''}" onclick="rFit('${r}')">${r}</span>`).join('')}</div>
+    <div class="rbs">${['1m','45d','3m','6m','1y'].map(r=>`<span class="rb3${r===range?' a':''}" onclick="rFit('${r}')">${r}</span>`).join('')}</div>
   </div>
   <div class="g3" style="margin-bottom:14px">
-    <div class="ci"><div class="cl">CTL</div><div class="cv cb">${ctl.toFixed(0)}</div><div class="cs">Fitness</div></div>
-    <div class="ci"><div class="cl">ATL</div><div class="cv ca">${atl.toFixed(0)}</div><div class="cs">Fatiga</div></div>
-    <div class="ci"><div class="cl">TSB</div><div class="cv ${tsb>=0?'ct':'cr'}">${tsb>=0?'+':''}${tsb.toFixed(1)}</div><div class="cs">Forma</div></div>
+    <div class="ci"><div class="cl3">CTL</div><div class="cv3 cb">${ctl.toFixed(0)}</div><div class="cs">Fitness</div></div>
+    <div class="ci"><div class="cl3">ATL</div><div class="cv3 ca">${atl.toFixed(0)}</div><div class="cs">Fatiga</div></div>
+    <div class="ci"><div class="cl3">TSB</div><div class="cv3 ${tsb>=0?'ct':'cr'}">${tsb>=0?'+':''}${tsb.toFixed(1)}</div><div class="cs">Forma</div></div>
   </div>
   <div class="cw">
     <svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -353,12 +661,17 @@ function rFit(range){
   </div>
 </div>
 <div class="card">
-  <div class="chd">🎯 Zonas de Forma TSB</div>
-  <div style="font-size:11px;color:var(--soft);line-height:1">
-    ${[['> +25','Muy fresco','cs2','Test o competición'],['10 a 25','Fresco','cb','Sesiones de calidad'],['-5 a 10','Óptimo Ironman','ct','✅ Listo para competir'],['-15 a -5','Fatiga moderada','ca','Normal en bloque'],['-30 a -15','Fatiga alta','cr','⚠️ Monitorear'],['< -30','Alto riesgo','cr','🔴 Reducir carga']].map(([r,nm,c,d])=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--edge)">
-      <span><span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px">${r}</span>&nbsp; ${nm}</span>
-      <span style="font-size:10px;color:var(--faint)">${d}</span>
+  <div class="chd">🎯 Interpretación TSB</div>
+  <div style="font-size:11px;line-height:1">
+    ${[['> +30','ct','Muy fresco · Test o A-race'],['15–30','cb','Fresco · Sesiones de calidad'],['5–15','cs2','Positivo · Pre-competencia ideal'],
+       ['-5 a 5','ct','Óptimo Ironman · Race day'],
+       ['-15 a -5','ca','Fatiga moderada · Normal en bloque'],
+       ['-25 a -15','ca','Fatiga alta · Monitorea señales'],
+       ['-35 a -25','cr','Zona de riesgo · Semana descarga'],
+       ['< -35','cr','Alerta máxima · Recuperación obligatoria']].map(([r,c,d])=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--edge);align-items:center">
+      <span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px;flex-shrink:0;margin-right:10px">${r}</span>
+      <span style="color:var(--soft);font-size:10px;text-align:right">${d}</span>
     </div>`).join('')}
   </div>
   <div class="ins" style="margin-top:10px;border-color:${tsb>10?'var(--teal)':tsb<-20?'var(--rose)':'var(--amber)'}">
@@ -367,6 +680,7 @@ function rFit(range){
 </div>`;
 }
 
+// ── VOLUMEN ────────────────────────────────────────────────────────────────
 function rVol(){
   const {acts}=S;
   const now=new Date(),dow=now.getDay()===0?6:now.getDay()-1;
@@ -378,16 +692,19 @@ function rVol(){
   const rows=[{k:'Swim',name:'Natación',icon:'🏊',col:'var(--blue)'},{k:'Ride',name:'Ciclismo',icon:'🚴',col:'var(--amber)'},{k:'Run',name:'Carrera',icon:'🏃',col:'var(--teal)'},{k:'WeightTraining',name:'Fuerza',icon:'🏋️',col:'var(--violet)'},{k:'Yoga',name:'Yoga',icon:'🧘',col:'var(--soft)'}];
   const tC=aC.reduce((s,a)=>s+(a.tss||0),0),tP=aP.reduce((s,a)=>s+(a.tss||0),0);
   const ramp=tP>0?((tC-tP)/tP*100):0;
+  const totDur=t=>t.reduce((s,a)=>s+(a.duracion_min||0),0);
+  const totKm=t=>t.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);
 
   document.getElementById('vc').innerHTML=`
 <div class="card">
   <div class="chd">📅 Semana Actual <span style="color:var(--faint)">desde lunes ${ws.slice(5)}</span></div>
   <div class="g3" style="margin-bottom:10px">
-    <div class="ci"><div class="cl">Sesiones</div><div class="cv ct">${aC.length}</div></div>
-    <div class="ci"><div class="cl">TSS Total</div><div class="cv ca">${tC}</div></div>
-    <div class="ci"><div class="cl">vs anterior</div><div class="cv ${ramp>0?'ca':'ct'}">${ramp>0?'+':''}${ramp.toFixed(0)}%</div></div>
+    <div class="ci"><div class="cl3">Sesiones</div><div class="cv3 ct">${aC.length}</div></div>
+    <div class="ci"><div class="cl3">TSS</div><div class="cv3 ca">${tC}</div></div>
+    <div class="ci"><div class="cl3">Rampa</div><div class="cv3 ${Math.abs(ramp)>15?'cr':ramp>0?'ca':'ct'}">${ramp>0?'+':''}${ramp.toFixed(0)}%</div></div>
   </div>
-  ${ramp>15?`<div class="ins" style="border-color:var(--amber)">⚠️ Rampa +${ramp.toFixed(0)}% sobre semana anterior. Riesgo de lesión. Considera limitar carga.</div>`:''}
+  ${ramp>15?`<div class="ins" style="border-color:var(--amber)">⚠️ Rampa +${ramp.toFixed(0)}% sobre semana anterior. Evidencia científica sugiere que >10-15% de incremento semanal aumenta riesgo de lesión por sobrecarga. Limita el volumen restante esta semana.</div>`:''}
+  ${ramp<-30?`<div class="ins" style="border-color:var(--teal)">↓ Semana de recuperación activa (${ramp.toFixed(0)}% vs anterior). Normal en periodización. El superávit de recuperación permitirá mayor carga la próxima semana.</div>`:''}
 </div>
 <div class="card">
   <div class="chd">🏊🚴🏃 Volumen por Disciplina</div>
@@ -412,8 +729,8 @@ function rVol(){
     }).join('')}
     <tr style="font-weight:700;border-top:1px solid var(--faint)">
       <td>Total</td>
-      <td style="font-size:10px">${(()=>{const t=aC.reduce((s,a)=>s+(a.duracion_min||0),0);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</td>
-      <td style="font-size:10px">${(()=>{const k=aC.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);return k?k.toFixed(0)+'km':'—'})()}</td>
+      <td style="font-size:10px">${(()=>{const t=totDur(aC);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</td>
+      <td style="font-size:10px">${(()=>{const k=totKm(aC);return k?k.toFixed(0)+'km':'—'})()}</td>
       <td style="color:var(--amber)">${tC}</td><td></td>
     </tr>
     </tbody>
@@ -421,22 +738,26 @@ function rVol(){
 </div>
 <div class="card">
   <div class="chd">📅 Semana Anterior <span style="color:var(--faint)">${pws.slice(5)}</span></div>
-  <div style="font-size:11px;color:var(--soft);display:flex;gap:16px;font-family:'Space Mono',monospace;flex-wrap:wrap">
-    <span>${aP.length} sesiones</span><span class="ca">TSS ${tP}</span>
-    <span>${(()=>{const t=aP.reduce((s,a)=>s+(a.duracion_min||0),0);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</span>
-    <span>${(()=>{const k=aP.reduce((s,a)=>s+(parseFloat(a.distancia_km)||0),0);return k?k.toFixed(0)+'km':'—'})()}</span>
+  <div style="font-size:11px;color:var(--soft);display:flex;gap:14px;font-family:'Space Mono',monospace;flex-wrap:wrap">
+    <span>${aP.length} ses.</span><span class="ca">TSS ${tP}</span>
+    <span>${(()=>{const t=totDur(aP);return t?`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}m`:'—'})()}</span>
+    <span>${(()=>{const k=totKm(aP);return k?k.toFixed(0)+'km':'—'})()}</span>
   </div>
 </div>`;
 }
 
+// ── ACTIVIDADES ────────────────────────────────────────────────────────────
 function rAct(){
   const {acts}=S;
   const byDate={};
-  acts.slice(0,25).forEach(a=>{const d=a.fecha;if(!byDate[d])byDate[d]=[];byDate[d].push(a)});
+  acts.slice(0,30).forEach(a=>{const d=a.fecha;if(!byDate[d])byDate[d]=[];byDate[d].push(a)});
   const html=Object.keys(byDate).sort((a,b)=>b.localeCompare(a)).map(date=>{
     const da=byDate[date];
     const dt=da.reduce((s,a)=>s+(a.tss||0),0);
-    return`<div class="card"><div class="chd">${date.slice(5)} <span class="ca">TSS ${dt}</span></div>
+    const rmDay=S.rmHist.find(r=>r.fecha===date);
+    const recBadge=rmDay?`${rcE(rmDay.recovery_color)} ${rmDay.recovery_score}%`:'';
+    return`<div class="card">
+      <div class="chd">${date.slice(5)} <span class="ca">TSS ${dt}</span> <span style="font-size:9px;color:var(--soft)">${recBadge}</span></div>
       ${da.map(a=>{
         const col=sc(a.tipo);
         const dur=a.duracion_min;
@@ -451,6 +772,7 @@ function rAct(){
   document.getElementById('ac').innerHTML=html||'<div class="loader">Sin actividades</div>';
 }
 
+// ── HAWAII ─────────────────────────────────────────────────────────────────
 function rHW(){
   const {fit,acts}=S;
   const hw=new Date('2026-10-10');
@@ -464,6 +786,8 @@ function rHW(){
   const k=1/42;let pCTL=ctl;
   for(let i=0;i<diff;i++){const d=i<dTap?tss7/7:(tss7/7)*0.4;pCTL=pCTL+(d-pCTL)*(1-Math.exp(-k))}
   const last30=fit.slice(-30),maxC=Math.max(...last30.map(d=>d.ctl),1);
+  const peakCTL=Math.max(...fit.map(d=>d.ctl)||[0]);
+  const peakDate=fit.find(d=>d.ctl===peakCTL)?.fecha||'';
 
   document.getElementById('hc').innerHTML=`
 <div class="hwb">
@@ -471,21 +795,28 @@ function rHW(){
   <div class="hwl">DÍAS PARA IRONMAN HAWAII · 10 OCT 2026</div>
   <div class="hwp">
     <div>📍 CTL actual <b class="cb">${ctl.toFixed(0)}</b> · Objetivo <b class="ct">${ctlT}</b> · Gap <b class="${ctl>=ctlT?'ct':'ca'}">${(ctl-ctlT).toFixed(0)}</b></div>
+    <div>🏆 CTL peak histórico: <b class="cv2">${peakCTL.toFixed(0)}</b>${peakDate?' el '+peakDate.slice(5):''}</div>
     <div>📅 Build: <b class="cv2">${wBuild}</b> semanas · Taper desde ${tapDate.toISOString().slice(0,10).slice(5)}</div>
-    <div>🎯 CTL proyectado race day: <b class="${pCTL>=ctlT?'ct':'ca'}">${pCTL.toFixed(0)}</b> ${pCTL>=ctlT?'✅':'⚠️'}</div>
-    <div>📊 TSS 7 días: <b class="ca">${tss7}</b> · Prom/día: <b class="ca">${(tss7/7).toFixed(0)}</b></div>
+    <div>🎯 CTL proyectado race day: <b class="${pCTL>=ctlT?'ct':'ca'}">${pCTL.toFixed(0)}</b> ${pCTL>=ctlT?'✅ En objetivo':'⚠️ Ajustar carga'}</div>
+    <div>📊 TSS 7d: <b class="ca">${tss7}</b> · Prom/día: <b class="ca">${(tss7/7).toFixed(0)}</b></div>
   </div>
 </div>
 <div class="card">
-  <div class="chd">🏁 Plan de Forma</div>
-  ${[['Race day TSB objetivo','-5 a +5','ct'],['CTL mínimo recomendado','120-140','cb'],['Inicio taper',tapDate.toISOString().slice(0,10),'cv2'],['Semanas de build',wBuild,'cb'],['TSS semanal necesario',`${Math.round(tss7*1.05)}-${Math.round(tss7*1.15)}`,'ca']].map(([l,v,c])=>`
-  <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--edge);font-size:11px">
+  <div class="chd">🧠 Análisis para Hawaii</div>
+  <div class="ins" style="border-color:${pCTL>=ctlT?'var(--teal)':'var(--amber)'}">
+    ${pCTL>=ctlT
+      ?`✅ Proyección favorable: con tu carga actual llegarás a Hawaii con CTL ~${pCTL.toFixed(0)}. El peak histórico de ${peakCTL.toFixed(0)} confirma que tienes el fitness base. Clave: mantener consistencia en las ${wBuild} semanas de build y ejecutar bien el taper de 3 semanas.`
+      :`⚠️ Necesitas aumentar ~${Math.round((ctlT-pCTL)/wBuild*7)} TSS/semana en los próximos ${wBuild} semanas para alcanzar CTL ${ctlT}. Distribuye incrementos graduales ≤10% semanal para evitar lesión. Foco en volumen aeróbico Z2 antes de añadir intensidad.`
+    }
+  </div>
+</div>
+<div class="card">
+  <div class="chd">🏁 Hoja de ruta</div>
+  ${[['TSB objetivo race day','-5 a +5','ct'],['CTL objetivo mínimo',`${ctlT}+`,'cb'],['Inicio taper',tapDate.toISOString().slice(0,10),'cv2'],['Semanas de build',`${wBuild} sem`,'cb'],['TSS/semana proyectado',`${Math.round(tss7*1.05)}-${Math.round(tss7*1.12)}`,'ca'],['CTL peak histórico',`${peakCTL.toFixed(0)}`,'cv2']].map(([l,v,c])=>`
+  <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--edge);font-size:11px">
     <span style="color:var(--soft)">${l}</span>
     <span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px">${v}</span>
   </div>`).join('')}
-  <div class="ins" style="margin-top:10px;border-color:${pCTL>=ctlT?'var(--teal)':'var(--amber)'}">
-    ${pCTL>=ctlT?`✅ Proyección favorable: CTL ~${pCTL.toFixed(0)} al race day. Mantén consistencia.`:`⚠️ Proyección CTL ~${pCTL.toFixed(0)} — bajo objetivo ${ctlT}. Necesitas +${Math.round((ctlT-pCTL)/wBuild*7)} TSS/sem en ${wBuild} semanas.`}
-  </div>
 </div>
 <div class="card">
   <div class="chd">📈 CTL últimos 30 días</div>
