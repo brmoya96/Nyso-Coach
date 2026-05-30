@@ -954,10 +954,11 @@ function rAct(){
         const pw=a.potencia_avg?`${a.potencia_avg}W/NP${a.potencia_np}`:'';
         const hr=a.fc_avg?`FC ${a.fc_avg}`:'';
         const meta=[dur?`${Math.floor(dur/60)}h${String(dur%60).padStart(2,'0')}m`:'',km?km.toFixed(1)+'km':'',pw,hr].filter(Boolean).join(' · ');
-        return`<button class="ai" onclick="openAct('${a.id}','${(a.nombre||sn(a.tipo)).replace(/'/g,"\\'")}' )" style="width:100%;background:none;border:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,229,200,.1)">
-          <div class="aic" style="background:${col}18;border:1px solid ${col}35">${si(a.tipo)}</div>
+        const safeNombre=(a.nombre||sn(a.tipo)).replace(/"/g,'&quot;');
+        return`<button class="ai act-btn" data-id="${a.id}" data-nombre="${safeNombre}" style="width:100%;background:none;border:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,229,200,.15);font-family:inherit;color:inherit;text-align:left;padding:11px 0;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--edge)">
+          <div class="aic" style="background:${col}18;border:1px solid ${col}35;flex-shrink:0">${si(a.tipo)}</div>
           <div class="aib"><div class="ain">${a.nombre||sn(a.tipo)}</div><div class="aim">${meta}</div></div>
-          <div style="display:flex;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
             <div class="ait">${a.tss||'—'}</div>
             <span style="color:var(--faint);font-size:14px">›</span>
           </div>
@@ -1035,6 +1036,17 @@ function show(id){
 }
 
 loadAll();
+
+// Event delegation para botones de actividad — funciona en iOS con contenido dinámico
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.act-btn');
+  if(btn){ openAct(btn.dataset.id, btn.dataset.nombre||'Actividad'); }
+});
+// touchend como fallback para iOS Safari
+document.addEventListener('touchend', function(e){
+  const btn = e.target.closest('.act-btn');
+  if(btn){ e.preventDefault(); openAct(btn.dataset.id, btn.dataset.nombre||'Actividad'); }
+}, {passive:false});
 </script>
 </body>
 </html>
