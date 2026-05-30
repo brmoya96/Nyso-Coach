@@ -462,11 +462,29 @@ async function qS(t,p=''){const r=await fetch(`${SU}/rest/v1/${t}?${p}`,{headers
 
 async function syncAll(){
   const btn=document.getElementById('sb');
-  btn.textContent='...';
-  // Solo recargamos datos desde Supabase (las edge functions corren por cron automáticamente)
+  btn.textContent='⟳';
+  btn.style.opacity='.7';
+  try {
+    // Llama a nyso-trigger que tiene CORS habilitado
+    const r = await fetch(`${SU}/functions/v1/nyso-trigger`, {
+      method:'POST',
+      headers:{...H,'Content-Type':'application/json'},
+      body:'{}'
+    });
+    const d = await r.json();
+    if(d.ok){
+      btn.textContent='✓ '+d.act_rows+'s';
+      setTimeout(()=>{btn.textContent='↻ SYNC';btn.style.opacity='1';},2500);
+    } else {
+      btn.textContent='Error';
+      setTimeout(()=>{btn.textContent='↻ SYNC';btn.style.opacity='1';},2500);
+    }
+  } catch(e) {
+    btn.textContent='↻ SYNC';
+    btn.style.opacity='1';
+  }
   S.loaded=false;
   await loadAll(true);
-  btn.textContent='↻ SYNC';
 }
 
 async function loadAll(forceRefresh=false){
