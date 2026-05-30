@@ -76,8 +76,9 @@ button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;disp
 .bar{height:5px;background:var(--edge);border-radius:3px;overflow:hidden;margin:6px 0}
 .bf{height:100%;border-radius:3px;transition:width 1.3s ease}
 .ins{font-size:11px;color:var(--soft);line-height:1.6;padding:9px 12px;background:rgba(0,0,0,.25);border-radius:9px;border-left:2px solid var(--faint);margin-top:6px}
-.mc-row{display:flex;align-items:center;justify-content:space-between}
-.mc-arrow{font-size:16px;color:var(--faint)}
+.mc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.mc-row>div:first-child{flex:1;min-width:0}
+.mc-arrow{font-size:16px;color:var(--faint);flex-shrink:0;padding-top:4px}
 
 /* CHART */
 .cw{width:100%;overflow:hidden}
@@ -212,10 +213,11 @@ function iHRV(v,b,acts7,rc){
 
 function iRHR(v,b){
   if(!v)return'FC reposo viene de Intervals.icu (sincronizado desde Garmin). Si no aparece, verifica la sincronización en la app.';
-  const d=v-b;
-  if(d<=-5)return`${Math.abs(d).toFixed(0)} bpm bajo tu base (${b} bpm). Adaptación cardiovascular positiva: mayor volumen sistólico, mejor eficiencia. El corazón bombea más sangre por latido.`;
-  if(d<=-3)return`${Math.abs(d).toFixed(0)} bpm bajo base. Corazón eficiente. Señal de buena recuperación y adaptación cardiovascular progresiva.`;
-  if(d<=2)return`Normal (${v} bpm ±${Math.abs(d)} de base). Sin alarmas. Sistema autónomo equilibrado.`;
+  const bRound=Math.round(b);
+  const d=Math.round(v-b);
+  if(d<=-5)return`${Math.abs(d)} bpm bajo tu base (${bRound} bpm). Adaptación cardiovascular positiva: mayor volumen sistólico, mejor eficiencia.`;
+  if(d<=-3)return`${Math.abs(d)} bpm bajo base. Corazón eficiente. Señal de buena recuperación y adaptación cardiovascular.`;
+  if(d<=2)return`Normal (${v} bpm, base ${bRound} bpm). Sin alarmas. Sistema autónomo equilibrado.`;
   if(d<=5)return`+${d.toFixed(0)} bpm sobre base. Posible fatiga acumulada, deshidratación o estrés. Hidrata bien (35ml/kg peso). Si persiste mañana, reduce carga.`;
   if(d<=8)return`+${d.toFixed(0)} bpm sobre base. Fatiga cardiovascular significativa. Verifica hidratación, calidad de sueño y carga de los últimos 7 días. Prioriza descanso.`;
   if(d<=12)return`+${d.toFixed(0)} bpm sobre base. Señal de alerta: sobreentrenamiento, inicio de enfermedad o estrés agudo. Reduce carga al 50% y monitorea 24-48h.`;
@@ -677,6 +679,32 @@ function rFit(range){
   <div class="ins" style="margin-top:10px;border-color:${tsb>10?'var(--teal)':tsb<-20?'var(--rose)':'var(--amber)'}">
     <b>Hoy TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}:</b> ${iTSB(tsb)}
   </div>
+</div>
+<div class="card">
+  <div class="chd">🧠 Análisis Entrenador</div>
+  ${(()=>{
+    const ctlTrend=data.length>=7?Number((data[data.length-1].ctl-data[Math.max(0,data.length-7)].ctl).toFixed(1)):null;
+    const ratio=ctl>0?atl/ctl:1;
+    const diff=Math.round((new Date('2026-10-10').getTime()-Date.now())/86400000);
+    const wLeft=Math.floor(diff/7);
+    const ins=[];
+    if(ctlTrend!==null){
+      if(ctlTrend>3)ins.push(`📈 <b>CTL +${ctlTrend} en 7 días</b> — buena progresión. No superes 8-10 pts/semana para evitar sobreentrenamiento.`);
+      else if(ctlTrend<-3)ins.push(`📉 <b>CTL ${ctlTrend} en 7 días</b> — reducción de carga. Normal si es semana de descarga planificada.`);
+      else ins.push(`➡️ <b>CTL estable (${ctlTrend>=0?'+':''}${ctlTrend} en 7d)</b> — mantenimiento. Considera semana de carga progresiva si el recovery lo permite.`);
+    }
+    if(tsb>15)ins.push(`🌟 <b>TSB ${tsb.toFixed(1)} muy fresco</b> — el cuerpo está listo para absorber carga alta. Añade volumen o intensidad esta semana.`);
+    else if(tsb>5)ins.push(`✅ <b>TSB ${tsb.toFixed(1)} forma positiva</b> — ventana para sesiones de calidad: intervalos, umbral o fondo moderado.`);
+    else if(tsb>-10)ins.push(`⚖️ <b>TSB ${tsb.toFixed(1)} zona de trabajo</b> — balance ideal para bloque de entrenamiento. Sigue el plan.`);
+    else if(tsb>-20)ins.push(`⚡ <b>TSB ${tsb.toFixed(1)} fatiga acumulada</b> — señal de bloque efectivo. Monitorea HRV diariamente. Semana de descarga si llevas >2 semanas acá.`);
+    else ins.push(`⚠️ <b>TSB ${tsb.toFixed(1)} fatiga elevada</b> — prioriza recuperación esta semana. Más carga ahora es contraproducente.`);
+    if(ratio>1.15)ins.push(`🔥 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga aguda supera fitness crónico. Zona de riesgo si se sostiene >2 semanas.`);
+    else if(ratio<0.85)ins.push(`💤 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga reciente muy baja vs fitness. Considera aumentar estímulo para evitar desentrenamiento.`);
+    if(ctl<100)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} necesita crecer. Foco en Z2 aeróbico las próximas 6-8 semanas antes de añadir intensidad.`);
+    else if(ctl<120)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} en buen camino. Consistencia + tapers estratégicos llevarán al objetivo 120-130 para race day.`);
+    else ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
+    return ins.map(i=>`<div class="ins" style="border-color:var(--blue);margin-bottom:6px">${i}</div>`).join('');
+  })()}
 </div>`;
 }
 
