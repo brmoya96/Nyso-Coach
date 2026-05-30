@@ -481,7 +481,16 @@ async function loadAll(forceRefresh=false){
       qS('actividades','order=fecha.desc&limit=50&select=*')
     ]);
     const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
-    S={rm,ad:adR[0]||{},fit:Array.isArray(fitR)?fitR:[],acts:Array.isArray(actsR)?actsR:[],rmAll,rmHist:Array.isArray(rmHist)?rmHist:[],loaded:true,td:today};
+    const fitArr=Array.isArray(fitR)?fitR:[];
+    // Fallback: si analisis_diarios no tiene datos de hoy, usar el último de fitness_diario
+    const lastFit=fitArr[fitArr.length-1]||{};
+    const adRaw=adR[0]||{};
+    const ad={
+      ctl: n(adRaw.ctl)??n(lastFit.ctl)??0,
+      atl: n(adRaw.atl)??n(lastFit.atl)??0,
+      tsb: n(adRaw.tsb)??n(lastFit.tsb)??0
+    };
+    S={rm,ad,fit:fitArr,acts:Array.isArray(actsR)?actsR:[],rmAll,rmHist:Array.isArray(rmHist)?rmHist:[],loaded:true,td:today};
     rRec();rFit(FR);rVol();rAct();rHW();
   }catch(e){
     ['rc','fc','vc','ac','hc'].forEach(id=>{
@@ -526,7 +535,7 @@ function rRec(){
 <div class="card" style="border-color:${rcol}33">
   <div class="chd">🧠 Análisis de Nyso</div>
   <div class="ins" style="border-color:${rcol}">${iRecovery(rs,rc,hv,rv,sp)}</div>
-  ${ctl!==null?`<div class="ins" style="border-color:var(--blue);margin-top:8px">${iTSB(tsb)}<br><span style="font-size:10px;font-family:'Space Mono',monospace;color:var(--faint)">CTL ${ctl.toFixed(0)} · ATL ${atl.toFixed(0)} · TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}</span></div>`:''}
+  ${ctl!==null?`<div class="ins" style="border-color:var(--blue);margin-top:8px">${iTSB(tsb)}<br><span style="font-size:10px;font-family:'Space Mono',monospace;color:var(--faint)">CTL ${(ctl??0).toFixed(0)} · ATL ${(atl??0).toFixed(0)} · TSB ${(tsb??0)>=0?'+':''}${(tsb??0).toFixed(1)}</span></div>`:''}
 </div>
 
 <!-- HRV -->
@@ -634,9 +643,9 @@ function rFit(range){
     <div class="rbs">${['1m','45d','3m','6m','1y'].map(r=>`<span class="rb3${r===range?' a':''}" onclick="rFit('${r}')">${r}</span>`).join('')}</div>
   </div>
   <div class="g3" style="margin-bottom:14px">
-    <div class="ci"><div class="cl3">CTL</div><div class="cv3 cb">${ctl.toFixed(0)}</div><div class="cs">Fitness</div></div>
-    <div class="ci"><div class="cl3">ATL</div><div class="cv3 ca">${atl.toFixed(0)}</div><div class="cs">Fatiga</div></div>
-    <div class="ci"><div class="cl3">TSB</div><div class="cv3 ${tsb>=0?'ct':'cr'}">${tsb>=0?'+':''}${tsb.toFixed(1)}</div><div class="cs">Forma</div></div>
+    <div class="ci"><div class="cl3">CTL</div><div class="cv3 cb">${(ctl??0).toFixed(0)}</div><div class="cs">Fitness</div></div>
+    <div class="ci"><div class="cl3">ATL</div><div class="cv3 ca">${(atl??0).toFixed(0)}</div><div class="cs">Fatiga</div></div>
+    <div class="ci"><div class="cl3">TSB</div><div class="cv3 ${tsb>=0?'ct':'cr'}">${(tsb??0)>=0?'+':''}${(tsb??0).toFixed(1)}</div><div class="cs">Forma</div></div>
   </div>
   <div class="cw">
     <svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -677,7 +686,7 @@ function rFit(range){
     </div>`).join('')}
   </div>
   <div class="ins" style="margin-top:10px;border-color:${tsb>10?'var(--teal)':tsb<-20?'var(--rose)':'var(--amber)'}">
-    <b>Hoy TSB ${tsb>=0?'+':''}${tsb.toFixed(1)}:</b> ${iTSB(tsb)}
+    <b>Hoy TSB ${(tsb??0)>=0?'+':''}${(tsb??0).toFixed(1)}:</b> ${iTSB(tsb)}
   </div>
 </div>
 <div class="card">
@@ -700,9 +709,9 @@ function rFit(range){
     else ins.push(`⚠️ <b>TSB ${tsb.toFixed(1)} fatiga elevada</b> — prioriza recuperación esta semana. Más carga ahora es contraproducente.`);
     if(ratio>1.15)ins.push(`🔥 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga aguda supera fitness crónico. Zona de riesgo si se sostiene >2 semanas.`);
     else if(ratio<0.85)ins.push(`💤 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga reciente muy baja vs fitness. Considera aumentar estímulo para evitar desentrenamiento.`);
-    if(ctl<100)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} necesita crecer. Foco en Z2 aeróbico las próximas 6-8 semanas antes de añadir intensidad.`);
-    else if(ctl<120)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} en buen camino. Consistencia + tapers estratégicos llevarán al objetivo 120-130 para race day.`);
-    else ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${ctl.toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
+    if(ctl<100)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} necesita crecer. Foco en Z2 aeróbico las próximas 6-8 semanas antes de añadir intensidad.`);
+    else if(ctl<120)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} en buen camino. Consistencia + tapers estratégicos llevarán al objetivo 120-130 para race day.`);
+    else ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
     return ins.map(i=>`<div class="ins" style="border-color:var(--blue);margin-bottom:6px">${i}</div>`).join('');
   })()}
 </div>`;
@@ -822,7 +831,7 @@ function rHW(){
   <div class="hwn">${diff}</div>
   <div class="hwl">DÍAS PARA IRONMAN HAWAII · 10 OCT 2026</div>
   <div class="hwp">
-    <div>📍 CTL actual <b class="cb">${ctl.toFixed(0)}</b> · Objetivo <b class="ct">${ctlT}</b> · Gap <b class="${ctl>=ctlT?'ct':'ca'}">${(ctl-ctlT).toFixed(0)}</b></div>
+    <div>📍 CTL actual <b class="cb">${(ctl??0).toFixed(0)}</b> · Objetivo <b class="ct">${ctlT}</b> · Gap <b class="${ctl>=ctlT?'ct':'ca'}">${(ctl-ctlT).toFixed(0)}</b></div>
     <div>🏆 CTL peak histórico: <b class="cv2">${peakCTL.toFixed(0)}</b>${peakDate?' el '+peakDate.slice(5):''}</div>
     <div>📅 Build: <b class="cv2">${wBuild}</b> semanas · Taper desde ${tapDate.toISOString().slice(0,10).slice(5)}</div>
     <div>🎯 CTL proyectado race day: <b class="${pCTL>=ctlT?'ct':'ca'}">${pCTL.toFixed(0)}</b> ${pCTL>=ctlT?'✅ En objetivo':'⚠️ Ajustar carga'}</div>
@@ -852,7 +861,7 @@ function rHW(){
     ${last30.map((d,i)=>{const h=Math.round((d.ctl/maxC)*48);const last=i===last30.length-1;return`<div style="flex:1;height:${Math.max(2,h)}px;background:${last?'var(--blue)':'#4d9fff35'};border-radius:2px 2px 0 0;${last?'box-shadow:0 0 6px var(--blue)':''}"></div>`}).join('')}
   </div>
   <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">
-    <span>${last30[0]?.fecha.slice(5)}</span><span>hoy ${ctl.toFixed(0)}</span>
+    <span>${last30[0]?.fecha.slice(5)}</span><span>hoy ${(ctl??0).toFixed(0)}</span>
   </div>
 </div>`;
 }
