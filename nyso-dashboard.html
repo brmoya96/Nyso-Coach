@@ -477,8 +477,8 @@ async function openAct(id,nombre){
     const isRide=d.tipo==='Ride'||d.tipo==='VirtualRide';
     const isRun=d.tipo==='Run'||d.tipo==='VirtualRun'||d.tipo==='TrailRun';
     const isSwim=d.tipo==='Swim';
-    const intervals=JSON.parse(d.intervals||'[]');
-    const intSummary=JSON.parse(d.interval_summary||'[]');
+    const intervals = (() => { try { return JSON.parse(d.intervals||'[]'); } catch { return []; } })();
+    const intSummary = (() => { try { return JSON.parse(d.interval_summary||'[]'); } catch { return []; } })();
     const carbsDeficit=(d.carbs_used_g||0)-(d.carbs_ingested_g||0);
 
     document.getElementById('modal-body').innerHTML=`
