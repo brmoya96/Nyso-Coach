@@ -569,13 +569,13 @@ ${intSummary.length?`
 </div>`:''}
 
 <!-- Tabla de intervalos detallada (si hay WORK intervals) -->
-${intervals.filter((iv:Record<string,unknown>)=>iv.type==='WORK').length>0?`
+${intervals.filter(iv=>iv.type==='WORK').length>0?`
 <div class="card" style="margin:10px 0 0;padding:12px 14px">
   <div class="chd" style="margin-bottom:8px">📊 Detalle Intervalos WORK</div>
   <table class="vt">
     <thead><tr><th>#</th><th>Dur</th><th>${isRide?'W avg':'Pace'}</th><th>FC</th><th>IF%</th></tr></thead>
     <tbody>
-    ${intervals.filter((iv:Record<string,unknown>)=>iv.type==='WORK').map((iv:Record<string,unknown>,i:number)=>`
+    ${intervals.filter(iv=>iv.type==='WORK').map((iv,i)=>`
     <tr>
       <td style="color:var(--faint)">${i+1}</td>
       <td style="color:var(--soft)">${fmtSecs(Number(iv.duration_seconds))}</td>
