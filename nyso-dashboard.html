@@ -460,6 +460,140 @@ function closeModal(e){if(e.target.id==='modal')document.getElementById('modal')
 // ── DATA ───────────────────────────────────────────────────────────────────
 async function qS(t,p=''){const r=await fetch(`${SU}/rest/v1/${t}?${p}`,{headers:H});return r.json()}
 
+// Abrir detalle de actividad
+async function openAct(id,nombre){
+  // Mostrar modal inmediatamente con loader
+  document.getElementById('modal-title').textContent=nombre;
+  document.getElementById('modal-body').innerHTML='<div class="loader"><div class="spin"></div>Cargando detalle...</div>';
+  document.getElementById('modal').classList.add('open');
+  try {
+    const det=await qS('actividades_detalle',`id=eq.${id}&select=*`);
+    const d=det[0];
+    if(!d){document.getElementById('modal-body').innerHTML='<div class="loader" style="color:var(--soft)">Sin detalle disponible.<br><br>Presiona SYNC para cargar detalles.</div>';return;}
+    const fmtSecs=s=>{if(!s)return'—';const m=Math.floor(s/60);return m>60?`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}m`:`${m}m`};
+    const fmtPct=(s,total)=>total>0?`${Math.round(s/total*100)}%`:'—';
+    const pwTotal=(d.z1_secs||0)+(d.z2_secs||0)+(d.z3_secs||0)+(d.z4_secs||0)+(d.z5_secs||0)+(d.z6_secs||0)+(d.ss_secs||0);
+    const hrTotal=(d.hrz1_secs||0)+(d.hrz2_secs||0)+(d.hrz3_secs||0)+(d.hrz4_secs||0);
+    const isRide=d.tipo==='Ride'||d.tipo==='VirtualRide';
+    const isRun=d.tipo==='Run'||d.tipo==='VirtualRun'||d.tipo==='TrailRun';
+    const isSwim=d.tipo==='Swim';
+    const intervals=JSON.parse(d.intervals||'[]');
+    const intSummary=JSON.parse(d.interval_summary||'[]');
+    const carbsDeficit=(d.carbs_used_g||0)-(d.carbs_ingested_g||0);
+
+    document.getElementById('modal-body').innerHTML=`
+<!-- Métricas principales -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+  ${isRide&&d.potencia_avg?`<div class="ci"><div class="cl3">Potencia</div><div class="cv3 ca">${d.potencia_avg}W</div><div class="cs">avg</div></div>`:''}
+  ${isRide&&d.potencia_np?`<div class="ci"><div class="cl3">NP</div><div class="cv3 ca">${d.potencia_np}W</div><div class="cs">norm</div></div>`:''}
+  ${d.fc_avg?`<div class="ci"><div class="cl3">FC avg</div><div class="cv3 cb">${d.fc_avg}</div><div class="cs">bpm</div></div>`:''}
+  ${d.intensity_factor?`<div class="ci"><div class="cl3">IF</div><div class="cv3 ct">${Number(d.intensity_factor).toFixed(2)}</div><div class="cs">intensidad</div></div>`:''}
+  ${d.variability_index?`<div class="ci"><div class="cl3">VI</div><div class="cv3 cs2">${Number(d.variability_index).toFixed(2)}</div><div class="cs">variab.</div></div>`:''}
+  ${d.cadencia_avg?`<div class="ci"><div class="cl3">Cadencia</div><div class="cv3 cs2">${d.cadencia_avg}</div><div class="cs">rpm</div></div>`:''}
+  ${d.elevacion_m?`<div class="ci"><div class="cl3">Elevación</div><div class="cv3 cs2">${d.elevacion_m}m</div><div class="cs">ganancia</div></div>`:''}
+  ${d.calorias?`<div class="ci"><div class="cl3">Calorías</div><div class="cv3 cs2">${d.calorias}</div><div class="cs">kcal</div></div>`:''}
+</div>
+
+<!-- Desacoplamiento + eficiencia -->
+${d.aerobic_decoupling!==null?`
+<div class="ins" style="border-color:${Math.abs(Number(d.aerobic_decoupling))<5?'var(--teal)':'var(--amber)'}">
+  <b>Desacoplamiento aeróbico: ${Number(d.aerobic_decoupling).toFixed(1)}%</b>
+  ${Math.abs(Number(d.aerobic_decoupling))<3?' — Excelente. Aeróbico bien desarrollado para esta intensidad.':Math.abs(Number(d.aerobic_decoupling))<5?' — Aceptable. Leve fatiga cardiovascular al final.':' — Elevado. Fatiga cardiovascular significativa. Considera reducir IF o aumentar Z2 base.'}
+</div>`:''}
+
+<!-- Nutrición (si hay datos) -->
+${d.carbs_used_g?`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">🍌 Nutrición en ruta</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div class="ci"><div class="cl3">Ingeridos</div><div class="cv3 ct">${d.carbs_ingested_g}g</div><div class="cs">carbs</div></div>
+    <div class="ci"><div class="cl3">Usados</div><div class="cv3 ca">${d.carbs_used_g}g</div><div class="cs">carbs</div></div>
+    <div class="ci"><div class="cl3">Déficit</div><div class="cv3 ${carbsDeficit>50?'cr':'ct'}">${carbsDeficit}g</div><div class="cs">${carbsDeficit>0?'faltó':'ok'}</div></div>
+  </div>
+  ${carbsDeficit>80?`<div class="ins" style="border-color:var(--rose);margin-top:8px">⚠️ Déficit de ${carbsDeficit}g de carbohidratos. Objetivo: 60-90g/h en esfuerzos >2h. Esto puede causar fatiga prematura y náuseas.</div>`:''}
+</div>`:''}
+
+<!-- Zonas de potencia -->
+${pwTotal>0?`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">⚡ Distribución de Zonas ${isRide?'Potencia':'FC'}</div>
+  ${[
+    {z:'Z1',s:d.z1_secs,col:'#3a3a55',label:'Recuperación'},
+    {z:'Z2',s:d.z2_secs,col:'var(--blue)',label:'Aeróbico'},
+    {z:'SS',s:d.ss_secs,col:'var(--teal)',label:'Sweet Spot'},
+    {z:'Z3',s:d.z3_secs,col:'var(--lime)',label:'Tempo'},
+    {z:'Z4',s:d.z4_secs,col:'var(--amber)',label:'Umbral'},
+    {z:'Z5',s:d.z5_secs,col:'var(--rose)',label:'VO2max'},
+    {z:'Z6',s:d.z6_secs,col:'#ff0080',label:'Anaeróbico'},
+  ].filter(z=>z.s>0).map(z=>`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+    <span style="width:22px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace;flex-shrink:0">${z.z}</span>
+    <div style="flex:1;height:14px;background:var(--edge);border-radius:3px;overflow:hidden">
+      <div style="width:${fmtPct(z.s,pwTotal)};height:100%;background:${z.col};border-radius:3px"></div>
+    </div>
+    <span style="width:28px;font-size:9px;color:var(--soft);font-family:'Space Mono',monospace;text-align:right">${fmtPct(z.s,pwTotal)}</span>
+    <span style="width:32px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace">${fmtSecs(z.s)}</span>
+    <span style="font-size:9px;color:var(--faint)">${z.label}</span>
+  </div>`).join('')}
+</div>`:''}
+
+<!-- Zonas FC -->
+${hrTotal>0?`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">❤️ Zonas Frecuencia Cardíaca</div>
+  ${[
+    {z:'Z1',s:d.hrz1_secs,col:'var(--blue)',label:'Aeróbico bajo'},
+    {z:'Z2',s:d.hrz2_secs,col:'var(--teal)',label:'Aeróbico'},
+    {z:'Z3',s:d.hrz3_secs,col:'var(--amber)',label:'Tempo'},
+    {z:'Z4',s:d.hrz4_secs,col:'var(--rose)',label:'Umbral/VO2'},
+  ].filter(z=>z.s>0).map(z=>`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+    <span style="width:22px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace;flex-shrink:0">${z.z}</span>
+    <div style="flex:1;height:14px;background:var(--edge);border-radius:3px;overflow:hidden">
+      <div style="width:${fmtPct(z.s,hrTotal)};height:100%;background:${z.col};border-radius:3px"></div>
+    </div>
+    <span style="width:28px;font-size:9px;color:var(--soft);font-family:'Space Mono',monospace;text-align:right">${fmtPct(z.s,hrTotal)}</span>
+    <span style="font-size:9px;color:var(--faint)">${fmtSecs(z.s)} · ${z.label}</span>
+  </div>`).join('')}
+</div>`:''}
+
+<!-- Intervalos -->
+${intSummary.length?`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">🎯 Intervalos</div>
+  ${intSummary.map((iv,i)=>`
+  <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--edge)">
+    <span style="width:20px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace">${i+1}</span>
+    <span style="font-size:11px;color:var(--txt);font-family:'Space Mono',monospace">${iv}</span>
+  </div>`).join('')}
+</div>`:''}
+
+<!-- Tabla de intervalos detallada (si hay WORK intervals) -->
+${intervals.filter((iv:Record<string,unknown>)=>iv.type==='WORK').length>0?`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">📊 Detalle Intervalos WORK</div>
+  <table class="vt">
+    <thead><tr><th>#</th><th>Dur</th><th>${isRide?'W avg':'Pace'}</th><th>FC</th><th>IF%</th></tr></thead>
+    <tbody>
+    ${intervals.filter((iv:Record<string,unknown>)=>iv.type==='WORK').map((iv:Record<string,unknown>,i:number)=>`
+    <tr>
+      <td style="color:var(--faint)">${i+1}</td>
+      <td style="color:var(--soft)">${fmtSecs(Number(iv.duration_seconds))}</td>
+      <td style="color:var(--amber);font-weight:600">${isRide&&iv.average_power?iv.average_power+'W':iv.average_pace||'—'}</td>
+      <td style="color:var(--blue)">${iv.average_hr||'—'}</td>
+      <td style="color:var(--soft)">${iv.intensity?Math.round(Number(iv.intensity))+'%':'—'}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+</div>`:''}
+
+<div style="font-size:9px;color:var(--faint);text-align:center;margin-top:12px;font-family:'Space Mono',monospace">Data provided by Garmin®</div>
+`;
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML=`<div class="loader" style="color:var(--rose)">Error: ${String(e)}</div>`;
+  }
+}
+
 async function syncAll(){
   const btn=document.getElementById('sb');
   btn.textContent='⟳';
@@ -820,7 +954,14 @@ function rAct(){
         const pw=a.potencia_avg?`${a.potencia_avg}W/NP${a.potencia_np}`:'';
         const hr=a.fc_avg?`FC ${a.fc_avg}`:'';
         const meta=[dur?`${Math.floor(dur/60)}h${String(dur%60).padStart(2,'0')}m`:'',km?km.toFixed(1)+'km':'',pw,hr].filter(Boolean).join(' · ');
-        return`<div class="ai"><div class="aic" style="background:${col}18;border:1px solid ${col}35">${si(a.tipo)}</div><div class="aib"><div class="ain">${a.nombre||sn(a.tipo)}</div><div class="aim">${meta}</div></div><div class="ait">${a.tss||'—'}</div></div>`;
+        return`<button class="ai" onclick="openAct('${a.id}','${(a.nombre||sn(a.tipo)).replace(/'/g,"\\'")}' )" style="width:100%;background:none;border:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,229,200,.1)">
+          <div class="aic" style="background:${col}18;border:1px solid ${col}35">${si(a.tipo)}</div>
+          <div class="aib"><div class="ain">${a.nombre||sn(a.tipo)}</div><div class="aim">${meta}</div></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="ait">${a.tss||'—'}</div>
+            <span style="color:var(--faint);font-size:14px">›</span>
+          </div>
+        </button>`;
       }).join('')}
     </div>`;
   }).join('');
