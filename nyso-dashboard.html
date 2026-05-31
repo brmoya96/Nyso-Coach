@@ -599,23 +599,21 @@ async function syncAll(){
   btn.textContent='⟳';
   btn.style.opacity='.7';
   try {
-    // Llama a nyso-trigger que tiene CORS habilitado
-    const r = await fetch(`${SU}/functions/v1/nyso-trigger`, {
-      method:'POST',
-      headers:{...H,'Content-Type':'application/json'},
-      body:'{}'
-    });
-    const d = await r.json();
-    if(d.ok){
-      btn.textContent='✓ '+d.act_rows+'s';
-      setTimeout(()=>{btn.textContent='↻ SYNC';btn.style.opacity='1';},2500);
-    } else {
-      btn.textContent='Error';
-      setTimeout(()=>{btn.textContent='↻ SYNC';btn.style.opacity='1';},2500);
+    // Llamar trigger múltiples veces — cada llamada carga 1 detalle de actividad
+    let calls=0;
+    while(calls<12){
+      const r=await fetch(`${SU}/functions/v1/nyso-trigger`,{
+        method:'POST',headers:{...H,'Content-Type':'application/json'},body:'{}'
+      });
+      const d=await r.json();
+      calls++;
+      if(!d.ok||!d.next_pending&&!d.detail_fetched) break;
+      if((d.remaining||0)===0) break;
     }
-  } catch(e) {
-    btn.textContent='↻ SYNC';
-    btn.style.opacity='1';
+    btn.textContent='✓ OK';
+    setTimeout(()=>{btn.textContent='↻ SYNC';btn.style.opacity='1';},2000);
+  } catch(e){
+    btn.textContent='↻ SYNC';btn.style.opacity='1';
   }
   S.loaded=false;
   await loadAll(true);
