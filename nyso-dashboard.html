@@ -628,7 +628,7 @@ async function loadAll(forceRefresh=false){
       qS('recovery_metrics','order=fecha.desc&limit=90&select=fecha,hrv_hoy,fc_reposo_hoy,horas_sueno,sleep_perf_pct,resp_rate,recovery_score,recovery_color,hrv_baseline,fc_reposo_baseline'),
       qS('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb`),
       qS('fitness_diario','order=fecha.asc&select=fecha,ctl,atl,tsb'),
-      qS('actividades','order=fecha.desc&limit=50&select=*')
+      qS('actividades',`fecha=gte.${new Date(Date.now()-14*86400000).toISOString().slice(0,10)}&order=fecha.desc&limit=100&select=*`)
     ]);
     const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
     const fitArr=Array.isArray(fitR)?fitR:[];
