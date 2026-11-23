@@ -159,7 +159,7 @@ button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;disp
   <div class="tab" onclick="show('fitness')">Fitness</div>
   <div class="tab" onclick="show('volume')">Volumen</div>
   <div class="tab" onclick="show('acts')">Sesiones</div>
-  <div class="tab" onclick="show('hawaii')">Hawaii</div>
+  <div class="tab" onclick="show('hawaii')">Carrera</div>
 </div>
 
 <div id="recovery" class="sec a"><div id="rc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
@@ -178,7 +178,7 @@ let FR='3m';
 const n=v=>{const x=Number(v);return(isNaN(x)||x===0)?null:x};
 const fmt=(v,s='')=>v!==null&&v!==undefined?`${v}${s}`:'<span class="na">—</span>';
 const fmtH=m=>{if(!m)return'<span class="na">—</span>';return`${Math.floor(m/60)}h${String(Math.round(m%60)).padStart(2,'0')}m`};
-const td=()=>new Date().toISOString().slice(0,10);
+const td=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago'}).format(new Date());
 const dAgo=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
 const rcC=c=>(c==='verde'||c==='green')?'var(--teal)':(c==='amarillo'||c==='yellow')?'var(--amber)':'var(--rose)';
 const rcK=c=>(c==='verde'||c==='green')?'ct':(c==='amarillo'||c==='yellow')?'ca':'cr';
@@ -623,13 +623,15 @@ async function loadAll(forceRefresh=false){
   if(S.loaded&&!forceRefresh){return}
   try{
     const today=td();
-    const [rmAll,rmHist,adR,fitR,actsR]=await Promise.all([
+    const [rmAll,rmHist,adR,fitR,actsR,cfgR]=await Promise.all([
       qS('recovery_metrics','order=fecha.desc&limit=14&select=*'),
       qS('recovery_metrics','order=fecha.desc&limit=90&select=fecha,hrv_hoy,fc_reposo_hoy,horas_sueno,sleep_perf_pct,resp_rate,recovery_score,recovery_color,hrv_baseline,fc_reposo_baseline'),
       qS('analisis_diarios',`fecha=eq.${today}&select=ctl,atl,tsb`),
       qS('fitness_diario','order=fecha.asc&select=fecha,ctl,atl,tsb'),
-      qS('actividades',`fecha=gte.${new Date(Date.now()-14*86400000).toISOString().slice(0,10)}&order=fecha.desc&limit=100&select=*`)
+      qS('actividades',`fecha=gte.${new Date(Date.now()-14*86400000).toISOString().slice(0,10)}&order=fecha.desc&limit=100&select=*`),
+      qS('app_config','clave=eq.proxima_carrera&select=valor').catch(()=>[])
     ]);
+    const race=(Array.isArray(cfgR)&&cfgR[0]&&cfgR[0].valor)?cfgR[0].valor:null;
     const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
     const fitArr=Array.isArray(fitR)?fitR:[];
     // Fallback: si analisis_diarios no tiene datos de hoy, usar el último de fitness_diario
@@ -640,7 +642,7 @@ async function loadAll(forceRefresh=false){
       atl: n(adRaw.atl)??n(lastFit.atl)??0,
       tsb: n(adRaw.tsb)??n(lastFit.tsb)??0
     };
-    S={rm,ad,fit:fitArr,acts:Array.isArray(actsR)?actsR:[],rmAll,rmHist:Array.isArray(rmHist)?rmHist:[],loaded:true,td:today};
+    S={rm,ad,fit:fitArr,acts:Array.isArray(actsR)?actsR:[],rmAll,rmHist:Array.isArray(rmHist)?rmHist:[],race,loaded:true,td:today};
     rRec();rFit(FR);rVol();rAct();rHW();
   }catch(e){
     ['rc','fc','vc','ac','hc'].forEach(id=>{
@@ -844,8 +846,9 @@ function rFit(range){
   ${(()=>{
     const ctlTrend=data.length>=7?Number((data[data.length-1].ctl-data[Math.max(0,data.length-7)].ctl).toFixed(1)):null;
     const ratio=ctl>0?atl/ctl:1;
-    const diff=Math.round((new Date('2026-10-10').getTime()-Date.now())/86400000);
-    const wLeft=Math.floor(diff/7);
+    const race=S.race;
+    const diff=race?Math.round((new Date(race.fecha+'T12:00:00').getTime()-Date.now())/86400000):null;
+    const rn=race?race.nombre:'';
     const ins=[];
     if(ctlTrend!==null){
       if(ctlTrend>3)ins.push(`📈 <b>CTL +${ctlTrend} en 7 días</b> — buena progresión. No superes 8-10 pts/semana para evitar sobreentrenamiento.`);
@@ -859,9 +862,10 @@ function rFit(range){
     else ins.push(`⚠️ <b>TSB ${tsb.toFixed(1)} fatiga elevada</b> — prioriza recuperación esta semana. Más carga ahora es contraproducente.`);
     if(ratio>1.15)ins.push(`🔥 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga aguda supera fitness crónico. Zona de riesgo si se sostiene >2 semanas.`);
     else if(ratio<0.85)ins.push(`💤 <b>ATL/CTL ${ratio.toFixed(2)}</b> — carga reciente muy baja vs fitness. Considera aumentar estímulo para evitar desentrenamiento.`);
-    if(ctl<100)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} necesita crecer. Foco en Z2 aeróbico las próximas 6-8 semanas antes de añadir intensidad.`);
-    else if(ctl<120)ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} en buen camino. Consistencia + tapers estratégicos llevarán al objetivo 120-130 para race day.`);
-    else ins.push(`🏝️ <b>Hawaii ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
+    if(diff===null||diff<0)ins.push(`🧱 <b>Sin carrera en el calendario</b>: CTL ${(ctl??0).toFixed(0)}. Fase de base — construye volumen aeróbico Z2 de forma progresiva.`);
+    else if(ctl<100)ins.push(`🏁 <b>${rn} ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} necesita crecer. Foco en Z2 aeróbico las próximas 6-8 semanas antes de añadir intensidad.`);
+    else if(ctl<120)ins.push(`🏁 <b>${rn} ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} en buen camino. Consistencia + tapers estratégicos llevarán al objetivo 120-130 para race day.`);
+    else ins.push(`🏁 <b>${rn} ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
     return ins.map(i=>`<div class="ins" style="border-color:var(--blue);margin-bottom:6px">${i}</div>`).join('');
   })()}
 </div>`;
@@ -967,41 +971,71 @@ function rAct(){
   document.getElementById('ac').innerHTML=html||'<div class="loader">Sin actividades</div>';
 }
 
-// ── HAWAII ─────────────────────────────────────────────────────────────────
+// ── PRÓXIMA CARRERA (desde calendario Intervals vía app_config) ──────────
 function rHW(){
-  const {fit,acts}=S;
-  const hw=new Date('2026-10-10');
-  const diff=Math.round((hw.getTime()-Date.now())/86400000);
+  const {fit,acts,race}=S;
   const lat=fit[fit.length-1]||{};
-  const ctl=lat.ctl||0,tsb=lat.tsb||0;
+  const ctl=lat.ctl||0;
+  const last30=fit.slice(-30),maxC=Math.max(...last30.map(d=>d.ctl),1);
+  const peakCTL=Math.max(...fit.map(d=>d.ctl),0);
+  const peakDate=fit.find(d=>d.ctl===peakCTL)?.fecha||'';
+  const tss7=acts.filter(a=>new Date(a.fecha)>=new Date(Date.now()-7*86400000)).reduce((s,a)=>s+(a.tss||0),0);
+  const graf=`
+<div class="card">
+  <div class="chd">📈 CTL últimos 30 días</div>
+  <div style="display:flex;align-items:flex-end;gap:3px;height:48px">
+    ${last30.map((d,i)=>{const h=Math.round((d.ctl/maxC)*48);const last=i===last30.length-1;return`<div style="flex:1;height:${Math.max(2,h)}px;background:${last?'var(--blue)':'#4d9fff35'};border-radius:2px 2px 0 0;${last?'box-shadow:0 0 6px var(--blue)':''}"></div>`}).join('')}
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">
+    <span>${last30[0]?.fecha.slice(5)||''}</span><span>hoy ${(ctl??0).toFixed(0)}</span>
+  </div>
+</div>`;
+
+  const hw=race?new Date(race.fecha+'T12:00:00'):null;
+  const diff=hw?Math.round((hw.getTime()-Date.now())/86400000):-1;
+  if(!race||diff<0){
+    document.getElementById('hc').innerHTML=`
+<div class="hwb">
+  <div class="hwn">—</div>
+  <div class="hwl">SIN CARRERA EN EL CALENDARIO</div>
+  <div class="hwp">
+    <div>📍 CTL actual <b class="cb">${(ctl??0).toFixed(0)}</b></div>
+    <div>🏆 CTL peak histórico: <b class="cv2">${peakCTL.toFixed(0)}</b>${peakDate?' el '+peakDate:''}</div>
+    <div>📊 TSS 7d: <b class="ca">${tss7}</b> · Prom/día: <b class="ca">${(tss7/7).toFixed(0)}</b></div>
+  </div>
+</div>
+<div class="card">
+  <div class="chd">🗓️ Agrega tu próxima carrera</div>
+  <div class="ins" style="border-color:var(--blue)">Carga la carrera en tu calendario de Intervals.icu como evento <b>RACE A</b> (o B/C). La app la toma sola en la próxima sincronización y vuelve la cuenta regresiva, proyección de CTL y fecha de taper.</div>
+</div>`+graf;
+    return;
+  }
+
   const ctlT=130,tapDate=new Date(hw.getTime()-21*86400000);
   const dTap=Math.round((tapDate.getTime()-Date.now())/86400000);
   const wBuild=Math.max(0,Math.floor(dTap/7));
-  const tss7=acts.filter(a=>new Date(a.fecha)>=new Date(Date.now()-7*86400000)).reduce((s,a)=>s+(a.tss||0),0);
   const k=1/42;let pCTL=ctl;
   for(let i=0;i<diff;i++){const d=i<dTap?tss7/7:(tss7/7)*0.4;pCTL=pCTL+(d-pCTL)*(1-Math.exp(-k))}
-  const last30=fit.slice(-30),maxC=Math.max(...last30.map(d=>d.ctl),1);
-  const peakCTL=Math.max(...fit.map(d=>d.ctl)||[0]);
-  const peakDate=fit.find(d=>d.ctl===peakCTL)?.fecha||'';
+  const fechaTxt=hw.toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}).toUpperCase();
 
   document.getElementById('hc').innerHTML=`
 <div class="hwb">
   <div class="hwn">${diff}</div>
-  <div class="hwl">DÍAS PARA IRONMAN HAWAII · 10 OCT 2026</div>
+  <div class="hwl">DÍAS PARA ${String(race.nombre).toUpperCase()} · ${fechaTxt}</div>
   <div class="hwp">
     <div>📍 CTL actual <b class="cb">${(ctl??0).toFixed(0)}</b> · Objetivo <b class="ct">${ctlT}</b> · Gap <b class="${ctl>=ctlT?'ct':'ca'}">${(ctl-ctlT).toFixed(0)}</b></div>
-    <div>🏆 CTL peak histórico: <b class="cv2">${peakCTL.toFixed(0)}</b>${peakDate?' el '+peakDate.slice(5):''}</div>
-    <div>📅 Build: <b class="cv2">${wBuild}</b> semanas · Taper desde ${tapDate.toISOString().slice(0,10).slice(5)}</div>
+    <div>🏆 CTL peak histórico: <b class="cv2">${peakCTL.toFixed(0)}</b>${peakDate?' el '+peakDate:''}</div>
+    <div>📅 Build: <b class="cv2">${wBuild}</b> semanas · Taper desde ${tapDate.toISOString().slice(5,10)}</div>
     <div>🎯 CTL proyectado race day: <b class="${pCTL>=ctlT?'ct':'ca'}">${pCTL.toFixed(0)}</b> ${pCTL>=ctlT?'✅ En objetivo':'⚠️ Ajustar carga'}</div>
     <div>📊 TSS 7d: <b class="ca">${tss7}</b> · Prom/día: <b class="ca">${(tss7/7).toFixed(0)}</b></div>
   </div>
 </div>
 <div class="card">
-  <div class="chd">🧠 Análisis para Hawaii</div>
+  <div class="chd">🧠 Análisis para ${race.nombre}</div>
   <div class="ins" style="border-color:${pCTL>=ctlT?'var(--teal)':'var(--amber)'}">
     ${pCTL>=ctlT
-      ?`✅ Proyección favorable: con tu carga actual llegarás a Hawaii con CTL ~${pCTL.toFixed(0)}. El peak histórico de ${peakCTL.toFixed(0)} confirma que tienes el fitness base. Clave: mantener consistencia en las ${wBuild} semanas de build y ejecutar bien el taper de 3 semanas.`
-      :`⚠️ Necesitas aumentar ~${Math.round((ctlT-pCTL)/wBuild*7)} TSS/semana en los próximos ${wBuild} semanas para alcanzar CTL ${ctlT}. Distribuye incrementos graduales ≤10% semanal para evitar lesión. Foco en volumen aeróbico Z2 antes de añadir intensidad.`
+      ?`✅ Proyección favorable: con tu carga actual llegarás con CTL ~${pCTL.toFixed(0)}. Clave: consistencia en las ${wBuild} semanas de build y un buen taper de 3 semanas.`
+      :`⚠️ Necesitas aumentar ~${Math.round((ctlT-pCTL)/Math.max(1,wBuild)*7)} TSS/semana en las próximas ${wBuild} semanas para alcanzar CTL ${ctlT}. Incrementos graduales ≤10% semanal. Foco en volumen aeróbico Z2 antes de añadir intensidad.`
     }
   </div>
 </div>
@@ -1012,16 +1046,7 @@ function rHW(){
     <span style="color:var(--soft)">${l}</span>
     <span class="${c}" style="font-family:'Space Mono',monospace;font-size:10px">${v}</span>
   </div>`).join('')}
-</div>
-<div class="card">
-  <div class="chd">📈 CTL últimos 30 días</div>
-  <div style="display:flex;align-items:flex-end;gap:3px;height:48px">
-    ${last30.map((d,i)=>{const h=Math.round((d.ctl/maxC)*48);const last=i===last30.length-1;return`<div style="flex:1;height:${Math.max(2,h)}px;background:${last?'var(--blue)':'#4d9fff35'};border-radius:2px 2px 0 0;${last?'box-shadow:0 0 6px var(--blue)':''}"></div>`}).join('')}
-  </div>
-  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--faint);font-family:'Space Mono',monospace">
-    <span>${last30[0]?.fecha.slice(5)}</span><span>hoy ${(ctl??0).toFixed(0)}</span>
-  </div>
-</div>`;
+</div>`+graf;
 }
 
 function show(id){
