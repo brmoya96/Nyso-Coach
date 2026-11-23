@@ -125,6 +125,27 @@ button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;disp
 .hwl{font-size:10px;color:var(--soft);margin-top:4px;letter-spacing:.06em}
 .hwp{margin-top:12px;font-size:11px;color:var(--soft);line-height:1.9;padding:11px 13px;background:rgba(0,0,0,.3);border-radius:10px;text-align:left}
 
+/* COACH */
+.cwrap{display:flex;flex-direction:column;height:calc(100vh - 112px);height:calc(100dvh - 112px)}
+.cmsgs{flex:1;overflow-y:auto;padding:10px 12px 6px;-webkit-overflow-scrolling:touch}
+.bub{max-width:86%;padding:10px 13px;border-radius:16px;font-size:13px;line-height:1.55;margin:6px 0;word-wrap:break-word;white-space:normal}
+.bub b{color:var(--teal)}
+.bu{margin-left:auto;background:#00e5c822;border:1px solid #00e5c840;border-bottom-right-radius:4px}
+.ba{margin-right:auto;background:var(--card);border:1px solid var(--edge);border-bottom-left-radius:4px}
+.be{margin-right:auto;background:#ff4d6d14;border:1px solid #ff4d6d40;color:var(--rose);font-size:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 11px;border-radius:16px;background:var(--edge);border:1px solid var(--faint);color:var(--txt);font-size:11px;font-family:inherit;cursor:pointer}
+.cin{display:flex;gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--edge);background:rgba(8,8,16,.96)}
+.cin textarea{flex:1;resize:none;background:var(--card);border:1px solid var(--edge);border-radius:14px;color:var(--txt);font-family:inherit;font-size:16px;padding:9px 12px;max-height:110px;outline:none}
+.cin button{background:var(--teal);border:none;border-radius:14px;color:#080810;font-weight:700;font-size:15px;padding:0 15px;cursor:pointer}
+.cin button:disabled{opacity:.4}
+.typing span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--soft);animation:tp 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tp{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.pinbox{text-align:center;padding:50px 24px}
+.pinbox input{width:160px;text-align:center;letter-spacing:.4em;font-size:22px;font-family:'Space Mono',monospace;background:var(--card);border:1px solid var(--edge);border-radius:12px;color:var(--txt);padding:10px;margin:16px 0 12px;outline:none}
+
 /* ALERTS */
 .ab{margin:10px 12px 0;padding:11px 13px;border-radius:10px;border:1px solid;font-size:11px;line-height:1.5}
 .aw{background:#ffb83010;border-color:#ffb83040;color:var(--amber)}
@@ -160,6 +181,7 @@ button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;disp
   <div class="tab" onclick="show('volume')">Volumen</div>
   <div class="tab" onclick="show('acts')">Sesiones</div>
   <div class="tab" onclick="show('hawaii')">Carrera</div>
+  <div class="tab" onclick="show('coach')">Coach</div>
 </div>
 
 <div id="recovery" class="sec a"><div id="rc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
@@ -167,6 +189,7 @@ button.hero,button.mc{background:var(--g);font-family:inherit;color:inherit;disp
 <div id="volume"   class="sec"><div id="vc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
 <div id="acts"     class="sec"><div id="ac"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
 <div id="hawaii"   class="sec"><div id="hc"><div class="loader"><div class="spin"></div>Cargando...</div></div></div>
+<div id="coach"    class="sec" style="padding-bottom:0"><div id="cc"></div></div>
 
 <script>
 const SU='https://ooziprpnyoorifmemser.supabase.co';
@@ -1053,9 +1076,97 @@ function show(id){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('a'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('a'));
   document.getElementById(id).classList.add('a');
-  const tabs=['recovery','fitness','volume','acts','hawaii'];
+  const tabs=['recovery','fitness','volume','acts','hawaii','coach'];
   document.querySelectorAll('.tab')[tabs.indexOf(id)]?.classList.add('a');
   if(id==='fitness'&&S.loaded)rFit(FR);
+  if(id==='coach')initCoach();
+}
+
+// ── COACH (chat con Nyso vía edge function nyso-chat) ─────────────────────
+const COACH={pin:null,msgs:[],loaded:false,busy:false};
+function getPin(){try{return localStorage.getItem('nyso_pin')||COACH.pin}catch(e){return COACH.pin}}
+function setPin(p){COACH.pin=p;try{p?localStorage.setItem('nyso_pin',p):localStorage.removeItem('nyso_pin')}catch(e){}}
+async function coachCall(body){
+  try{
+    const r=await fetch(`${SU}/functions/v1/nyso-chat`,{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({...body,pin:getPin()})});
+    return await r.json();
+  }catch(e){return{ok:false,error:'Sin conexión. Revisa tu internet.'}}
+}
+const escH=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const mdLite=t=>escH(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+
+function rCoachPin(err){
+  document.getElementById('cc').innerHTML=`
+<div class="pinbox">
+  <div style="font-size:34px">🧠</div>
+  <div style="font-size:15px;font-weight:700;margin-top:8px">Coach Nyso</div>
+  <div style="font-size:11px;color:var(--soft);margin-top:6px;line-height:1.6">Ingresa tu PIN para conversar con tu coach.<br>Se guarda en este teléfono.</div>
+  <input id="pinin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="••••••">
+  ${err?`<div style="color:var(--rose);font-size:11px;margin-bottom:8px">${err}</div>`:''}
+  <div><button class="sbtn" onclick="pinOk()">ENTRAR</button></div>
+</div>`;
+  const i=document.getElementById('pinin');
+  i.addEventListener('keydown',e=>{if(e.key==='Enter')pinOk()});
+}
+async function pinOk(){
+  const v=(document.getElementById('pinin').value||'').trim();
+  if(!v)return;
+  setPin(v);COACH.loaded=false;await initCoach();
+}
+
+async function initCoach(){
+  if(COACH.loaded){rCoachChat();return}
+  if(!getPin()){rCoachPin();return}
+  document.getElementById('cc').innerHTML='<div class="loader"><div class="spin"></div>Cargando conversación...</div>';
+  const d=await coachCall({accion:'historial'});
+  if(!d.ok){
+    if(d.error==='pin'){setPin(null);rCoachPin('PIN incorrecto');return}
+    document.getElementById('cc').innerHTML=`<div class="loader" style="color:var(--rose)">${escH(d.error||'Error')}</div>`;return;
+  }
+  COACH.msgs=(d.mensajes||[]).map(m=>({rol:m.rol,txt:m.contenido}));
+  COACH.loaded=true;
+  rCoachChat();
+}
+
+const CHIPS=['¿Entreno o descanso hoy?','¿Cómo dormí?','¿Cómo va mi carga?','Analiza mi último entreno','¿Qué hago mañana?'];
+function rCoachChat(){
+  const box=document.getElementById('cc');
+  if(!document.getElementById('cmsgs')){
+    box.innerHTML=`
+<div class="cwrap">
+  <div class="cmsgs" id="cmsgs"></div>
+  <div class="chips" id="chips">${CHIPS.map(c=>`<button class="chip" onclick="coachSend(this.textContent)">${c}</button>`).join('')}</div>
+  <div class="cin">
+    <textarea id="cinp" rows="1" placeholder="Pregúntale a Nyso..."></textarea>
+    <button id="csend" onclick="coachSend()">↑</button>
+  </div>
+</div>`;
+    const ta=document.getElementById('cinp');
+    ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(110,ta.scrollHeight)+'px'});
+  }
+  const m=document.getElementById('cmsgs');
+  const hola=!COACH.msgs.length?`<div class="bub ba">Hola ${'Benja'} 👋 Soy Nyso. Tengo tu recovery, sueño, carga y entrenos al día. Pregúntame lo que quieras o usa los atajos de abajo.</div>`:'';
+  m.innerHTML=hola+COACH.msgs.map(x=>`<div class="bub ${x.rol==='user'?'bu':x.rol==='error'?'be':'ba'}">${x.rol==='user'?escH(x.txt).replace(/\n/g,'<br>'):mdLite(x.txt)}</div>`).join('')
+    +(COACH.busy?'<div class="bub ba typing"><span></span><span></span><span></span></div>':'');
+  m.scrollTop=m.scrollHeight;
+  const b=document.getElementById('csend');if(b)b.disabled=COACH.busy;
+}
+
+async function coachSend(txt){
+  if(COACH.busy)return;
+  const ta=document.getElementById('cinp');
+  const msg=(txt??ta.value).trim();
+  if(!msg)return;
+  if(!txt){ta.value='';ta.style.height='auto';}
+  COACH.msgs.push({rol:'user',txt:msg});COACH.busy=true;rCoachChat();
+  const d=await coachCall({accion:'enviar',mensaje:msg});
+  COACH.busy=false;
+  if(d.ok)COACH.msgs.push({rol:'assistant',txt:d.respuesta});
+  else{
+    if(d.error==='pin'){setPin(null);COACH.loaded=false;rCoachPin('PIN incorrecto');return}
+    COACH.msgs.push({rol:'error',txt:d.error||'Error'});
+  }
+  rCoachChat();
 }
 
 loadAll();
