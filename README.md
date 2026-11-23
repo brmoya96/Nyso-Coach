@@ -19,7 +19,7 @@ Click en "Fork" arriba a la derecha en GitHub.
 ### 2. Agregar los secrets
 Ve a tu repositorio → Settings → Secrets and variables → Actions → New repository secret
 
-Agrega estos 5 secrets:
+Agrega estos 7 secrets:
 
 | Secret | Valor |
 |--------|-------|
@@ -28,6 +28,8 @@ Agrega estos 5 secrets:
 | `TELEGRAM_BOT_TOKEN` | Token de tu bot (de @BotFather) |
 | `TELEGRAM_CHAT_ID` | Tu Chat ID (de @userinfobot) |
 | `ANTHROPIC_API_KEY` | Tu API key de console.anthropic.com |
+| `SUPABASE_URL` | URL del proyecto Supabase |
+| `SUPABASE_KEY` | Service key de Supabase |
 
 ### 3. Habilitar GitHub Actions
 Ve a la pestaña "Actions" en tu repositorio y click "Enable Actions" si aparece.
@@ -42,9 +44,18 @@ Desde ese momento corre automático cada mañana a las 5:50am. No necesitas hace
 
 ## Horario
 
-El cron está configurado para 5:50am hora Santiago:
-- **Invierno chileno (Apr-Sep):** UTC-4 → 9:50am UTC ✓
-- **Verano chileno (Oct-Mar):** UTC-3 → cambiar el cron a `50 8 * * *`
+GitHub Actions solo entiende UTC, así que cada workflow corre en los dos horarios posibles (verano UTC-3 e invierno UTC-4) y el script decide en hora de Santiago:
+- **Mensaje diario:** 5:50am Santiago, una vez al día.
+- **Alertas:** cada hora entre 6:00 y 22:59 Santiago (máx. 2 alertas/día + hasta 4 análisis post-entreno).
+- **Resumen semanal:** domingo 20:00 Santiago.
+
+No hay que tocar los cron al cambiar la hora en Chile.
+
+## Fuentes de datos
+
+- **Intervals.icu** es la única fuente de wellness, actividades, umbrales (FTP, LTHR, ritmo umbral, zonas FC) y calendario de carreras (eventos `RACE_A/B/C`).
+- Para actualizar umbrales después de un test: cámbialos en Intervals → Settings. Los scripts los leen solos.
+- Objetivo de CTL opcional: fila `ctl_objetivo` en la tabla `perfil_atleta` de Supabase.
 
 ## Costo estimado
 
