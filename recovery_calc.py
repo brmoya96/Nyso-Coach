@@ -1,5 +1,7 @@
 import math
 
+from nyso_common import fc_reposo, carga, fc_media, horas_sueno
+
 
 def _filtrar_outliers(valores, pct=0.10):
     if len(valores) <= 4:
@@ -13,8 +15,8 @@ def _filtrar_outliers(valores, pct=0.10):
 def _calcular_baselines(wellness_30d, wellness_60d):
     hrv_30 = [w["hrv"] for w in wellness_30d if w.get("hrv")]
     hrv_60 = [w["hrv"] for w in wellness_60d if w.get("hrv")]
-    fc_30 = [w["restingHeartRate"] for w in wellness_30d if w.get("restingHeartRate")]
-    fc_60 = [w["restingHeartRate"] for w in wellness_60d if w.get("restingHeartRate")]
+    fc_30 = [fc_reposo(w) for w in wellness_30d if fc_reposo(w)]
+    fc_60 = [fc_reposo(w) for w in wellness_60d if fc_reposo(w)]
 
     hrv_reciente = None
     if hrv_30:
@@ -66,14 +68,7 @@ def _score_fc_reposo(fc_hoy, baselines, fc_optima_perfil=49.0):
 
 
 def _get_horas_sueno(wellness_hoy):
-    if wellness_hoy.get("sleepSecs"):
-        return wellness_hoy["sleepSecs"] / 3600
-    if wellness_hoy.get("sleepHours"):
-        try:
-            return float(wellness_hoy["sleepHours"])
-        except (TypeError, ValueError):
-            pass
-    return None
+    return horas_sueno(wellness_hoy)
 
 
 def _score_sueno(wellness_hoy):
@@ -92,12 +87,12 @@ def _categoria_recovery(score):
 
 
 def _calcular_day_strain(actividades):
-    tss_total = sum(a.get("training_load", 0) or 0 for a in actividades)
+    tss_total = sum(carga(a) for a in actividades)
     strain_base = 4 * math.log(tss_total + 1) - 2
 
     suma_fc_t = total_t = 0
     for a in actividades:
-        fc = a.get("average_heartrate", 0) or 0
+        fc = fc_media(a)
         t = a.get("moving_time", 0) or 0
         if fc > 0 and t > 0:
             suma_fc_t += fc * t
@@ -182,7 +177,7 @@ def procesar_recovery(wellness_data, actividades_ayer, perfil):
     baselines = _calcular_baselines(wellness_30d, wellness_data)
 
     hrv_hoy = wellness_hoy.get("hrv")
-    fc_hoy = wellness_hoy.get("restingHeartRate")
+    fc_hoy = fc_reposo(wellness_hoy)
     horas_sueno = _get_horas_sueno(wellness_hoy)
 
     hrv_optimo_perfil = float(perfil.get("hrv_optimo", 55))

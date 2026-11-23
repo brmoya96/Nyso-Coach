@@ -1,95 +1,30 @@
 import os
-import requests
-from datetime import datetime, timedelta
-from anthropic import Anthropic
-import base64
 import json
+from datetime import timedelta
 
+import requests
+from anthropic import Anthropic
+
+from nyso_common import (
+    ahora, hoy_str, es_ejecucion_programada,
+    get_wellness, get_activities, get_events, get_umbrales, texto_umbrales, get_proxima_carrera,
+    supabase_get, supabase_post, supabase_patch, send_telegram, get_perfil,
+    carga, fc_media, fc_reposo, horas_sueno, tsb, respiracion, spo2, actividad_es_hoy,
+)
 from recovery_calc import procesar_recovery, formatear_recovery_bloque
 
-# === CONFIGURACIÓN ===
-INTERVALS_ATHLETE_ID = os.environ["INTERVALS_ATHLETE_ID"]
-INTERVALS_API_KEY = os.environ["INTERVALS_API_KEY"]
-TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_KEY"]
-
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
-# === INTERVALS.ICU ===
+HORA_ENVIO = 5  # El cron corre 2 veces (invierno/verano); solo se envía desde las 5am de Santiago
 
-def intervals_get(endpoint):
-    credentials = base64.b64encode(f"API_KEY:{INTERVALS_API_KEY}".encode()).decode()
-    response = requests.get(
-        f"https://intervals.icu/api/v1/athlete/{INTERVALS_ATHLETE_ID}/{endpoint}",
-        headers={"Authorization": f"Basic {credentials}"}
-    )
-    response.raise_for_status()
-    return response.json()
 
-def get_wellness(days=14):
-    today = datetime.now()
-    oldest = (today - timedelta(days=days)).strftime("%Y-%m-%d")
-    newest = today.strftime("%Y-%m-%d")
-    return intervals_get(f"wellness?oldest={oldest}&newest={newest}")
-
-def get_activities(days=7):
-    today = datetime.now()
-    oldest = (today - timedelta(days=days)).strftime("%Y-%m-%d")
-    newest = today.strftime("%Y-%m-%d")
-    return intervals_get(f"activities?oldest={oldest}&newest={newest}")
-
-def get_events_next_60_days():
-    today = datetime.now()
-    oldest = today.strftime("%Y-%m-%d")
-    newest = (today + timedelta(days=60)).strftime("%Y-%m-%d")
+def ya_enviado_hoy():
     try:
-        return intervals_get(f"events?oldest={oldest}&newest={newest}")
-    except:
-        return []
+        return bool(supabase_get("analisis_diarios", f"fecha=eq.{hoy_str()}&select=fecha"))
+    except Exception:
+        return False
 
-# === SUPABASE ===
-
-def supabase_get(table, params=""):
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/{table}?{params}",
-        headers={
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}",
-            "Content-Type": "application/json"
-        }
-    )
-    response.raise_for_status()
-    return response.json()
-
-def supabase_post(table, data):
-    response = requests.post(
-        f"{SUPABASE_URL}/rest/v1/{table}",
-        headers={
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}",
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates"
-        },
-        json=data
-    )
-    response.raise_for_status()
-    return response
-
-def supabase_patch(table, match_field, match_value, data):
-    response = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/{table}?{match_field}=eq.{match_value}",
-        headers={
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}",
-            "Content-Type": "application/json"
-        },
-        json=data
-    )
-    response.raise_for_status()
-    return response
 
 def get_memoria():
     """Lee toda la memoria relevante de Supabase"""
@@ -114,11 +49,7 @@ def get_memoria():
         memoria["patrones_activos"] = []
 
     # Perfil del atleta
-    try:
-        perfil_raw = supabase_get("perfil_atleta", "")
-        memoria["perfil"] = {r["clave"]: r["valor"] for r in perfil_raw if r.get("valor")}
-    except:
-        memoria["perfil"] = {}
+    memoria["perfil"] = get_perfil()
 
     # Últimas 5 carreras
     try:
@@ -188,14 +119,8 @@ def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, ban
         except: return None
 
     # Calcular horas de sueño
-    horas_sueno = None
-    try:
-        if wellness_hoy.get("sleepSecs"):
-            horas_sueno = round(float(wellness_hoy["sleepSecs"]) / 3600, 2)
-        elif wellness_hoy.get("sleepHours"):
-            horas_sueno = round(float(wellness_hoy["sleepHours"]), 2)
-    except:
-        horas_sueno = None
+    hs = horas_sueno(wellness_hoy)
+    hs = round(hs, 2) if hs is not None else None
 
     # Limpiar actividades
     actividades_limpias = []
@@ -209,8 +134,8 @@ def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, ban
                 "type": str(a.get("type", "")),
                 "duration_minutes": dur,
                 "distance_km": dist,
-                "tss": to_float(a.get("training_load")),
-                "avg_hr": to_int(a.get("average_heartrate"))
+                "tss": to_float(carga(a)),
+                "avg_hr": to_int(fc_media(a))
             })
         except:
             pass
@@ -218,12 +143,12 @@ def guardar_analisis(fecha, wellness_hoy, actividades_hoy, tss_dia, mensaje, ban
     data = {
         "fecha": str(fecha),
         "hrv": to_int(wellness_hoy.get("hrv")),
-        "fc_reposo": to_int(wellness_hoy.get("restingHeartRate")),
-        "horas_sueno": horas_sueno,
+        "fc_reposo": to_int(fc_reposo(wellness_hoy)),
+        "horas_sueno": hs,
         "sleep_score": to_int(wellness_hoy.get("sleepScore")),
         "ctl": to_float(wellness_hoy.get("ctl")),
         "atl": to_float(wellness_hoy.get("atl")),
-        "tsb": to_float(wellness_hoy.get("tsb")),
+        "tsb": to_float(tsb(wellness_hoy)),
         "actividades_hoy": actividades_limpias,
         "tss_dia": to_int(tss_dia),
         "mensaje_telegram": str(mensaje),
@@ -268,8 +193,8 @@ def guardar_recovery(fecha, resultado):
 
 def actualizar_patron(categoria, descripcion, severidad="info"):
     """Crea o actualiza un patrón detectado"""
-    today = datetime.now().strftime("%Y-%m-%d")
-    
+    today = hoy_str()
+
     # Buscar si existe el patrón
     existing = supabase_get(
         "patrones",
@@ -298,21 +223,30 @@ def actualizar_patron(categoria, descripcion, severidad="info"):
 
 # === ANÁLISIS CON CLAUDE ===
 
-def analizar_con_claude(wellness_30d, activities_7d, events, memoria, recovery_resultado=None, recovery_bloque=""):
+def analizar_con_claude(wellness_30d, activities_7d, events, memoria, recovery_resultado=None, recovery_bloque="", umbrales=None, proxima_carrera=None):
     """Llama a Claude con datos frescos + recovery score + memoria histórica"""
 
-    today = datetime.now().strftime("%A %d de %B %Y")
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+    MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+             "septiembre", "octubre", "noviembre", "diciembre"]
+    n = ahora()
+    today = f"{DIAS[n.weekday()]} {n.day} de {MESES[n.month - 1]} {n.year}"
+    today_str = hoy_str()
 
     wellness_14d = wellness_30d[-14:] if len(wellness_30d) >= 14 else wellness_30d
     wellness_hoy = wellness_14d[-1] if wellness_14d else {}
     wellness_ayer = wellness_14d[-2] if len(wellness_14d) >= 2 else {}
 
-    actividades_hoy = [
-        a for a in activities_7d
-        if a.get("start_date_local", "").startswith(today_str)
-    ]
-    tss_dia = sum(a.get("training_load", 0) or 0 for a in actividades_hoy)
+    actividades_hoy = [a for a in activities_7d if actividad_es_hoy(a, today_str)]
+    tss_dia = sum(carga(a) for a in actividades_hoy)
+
+    resp_hoy = respiracion(wellness_hoy)
+    spo2_hoy = spo2(wellness_hoy)
+    tsb_hoy = tsb(wellness_hoy)
+    if proxima_carrera:
+        carrera_txt = f"{proxima_carrera['nombre']} ({proxima_carrera['categoria']}) el {proxima_carrera['fecha']} — faltan {proxima_carrera['dias']} días"
+    else:
+        carrera_txt = "No hay carrera (RACE) en el calendario de Intervals"
 
     # Promedios históricos desde memoria
     analisis_previos = memoria.get("analisis_recientes", [])
@@ -347,7 +281,18 @@ FECHA HOY: {today}
 ### Actividades últimos 7 días:
 {json.dumps(activities_7d, indent=2)}
 
-### Próximas carreras (60 días):
+### Resumen wellness de hoy (ya interpretado):
+- TSB (forma = CTL - ATL): {tsb_hoy}
+- Frecuencia respiratoria nocturna: {resp_hoy if resp_hoy else "sin dato"}
+- SpO2 nocturna: {spo2_hoy if spo2_hoy else "sin dato"}
+
+### Umbrales ACTUALES del atleta (configuración de Intervals — fuente de verdad):
+{texto_umbrales(umbrales or {})}
+
+### Próxima carrera:
+{carrera_txt}
+
+### Eventos próximos 60 días (calendario Intervals):
 {json.dumps(events, indent=2)}
 
 ### Recovery Score de hoy (pre-calculado — inserta este bloque literalmente en la sección Recovery):
@@ -400,7 +345,7 @@ Máximo 450 palabras. Secciones:
 3. Forma actual — CTL/ATL/TSB, qué significa HOY para él
 4. Recomendación de HOY — concreta y específica (ej: "Z2 45 min máximo", no "entrena suave")
 5. Banderas — máximo 3, solo las importantes. Menciona si son patrones repetidos
-6. Próxima carrera — si hay una, días que faltan y una frase de contexto
+6. Próxima carrera — si hay una, días que faltan y una frase de contexto. Si no hay, omite esta sección
 7. Frase final — corta, auténtica, no cursi
 
 Reglas especiales Recovery:
@@ -413,7 +358,8 @@ Reglas especiales Exámenes de sangre y Tests:
 - Si han pasado más de 4 meses desde el último examen de sangre, recuérdalo como bandera
 - Si la testosterona del último examen fue menor a 450 ng/dL, es señal de estrés fisiológico alto — menciónalo con contexto de carga de entrenamiento
 - Si la vitamina D fue menor a 35, mencionar que puede seguir cayendo en invierno y recomendar suplementación
-- Al analizar runs, comparar FC y pace contra las zonas del test de lactato de marzo 2026: OBLA 3:32/km, umbral aeróbico 3:54/km, Z2 tope 4:30/km
+- Al analizar runs y bici, compara FC, ritmo y potencia contra los "Umbrales ACTUALES" de arriba (vienen de Intervals). Si el último test de rendimiento es más reciente y no calza con Intervals, menciónalo
+- Si la frecuencia respiratoria o la SpO2 están fuera de lo normal respecto a días anteriores, inclúyelo como bandera (puede anticipar enfermedad)
 
 Reglas generales: usa datos reales, compara siempre con histórico cuando tengas datos, sé directo.
 
@@ -454,61 +400,43 @@ Si no hay banderas, patrones nuevos o a resolver, usa listas vacías [].
 
     return mensaje_telegram, metadata, actividades_hoy, tss_dia, wellness_hoy
 
-# === TELEGRAM ===
-
-def send_telegram(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    if len(message) <= 4096:
-        requests.post(url, json={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message,
-            "parse_mode": "Markdown"
-        })
-    else:
-        mid = message[:4096].rfind("\n")
-        requests.post(url, json={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message[:mid],
-            "parse_mode": "Markdown"
-        })
-        requests.post(url, json={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message[mid:],
-            "parse_mode": "Markdown"
-        })
-
 # === MAIN ===
 
 def main():
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    yesterday_str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    print(f"Coach Triatlón - {today_str}")
+    n = ahora()
+    today_str = hoy_str()
+    yesterday_str = (n - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"Coach Triatlón - {today_str} {n.strftime('%H:%M')} (Santiago)")
     print("="*40)
+
+    if es_ejecucion_programada():
+        if n.hour < HORA_ENVIO:
+            print(f"Son las {n.strftime('%H:%M')} en Santiago, antes de las {HORA_ENVIO}am. La otra corrida del cron envía.")
+            return
+        if ya_enviado_hoy():
+            print("Ya se envió el mensaje de hoy. Nada que hacer.")
+            return
 
     print("1. Leyendo datos de Intervals.icu...")
     wellness_30d = get_wellness(days=30)
     activities_7d = get_activities(days=7)
-    events = get_events_next_60_days()
+    events = get_events(days=60)
+    umbrales = get_umbrales()
+    proxima_carrera = get_proxima_carrera()
     print(f"   ✓ Wellness: {len(wellness_30d)} días")
     print(f"   ✓ Actividades: {len(activities_7d)}")
     print(f"   ✓ Eventos próximos: {len(events)}")
+    print(f"   ✓ Umbrales: {list(umbrales.keys())}")
+    print(f"   ✓ Próxima carrera: {proxima_carrera['nombre'] + ' en ' + str(proxima_carrera['dias']) + ' días' if proxima_carrera else 'ninguna'}")
 
     print("2. Leyendo memoria histórica de Supabase...")
     memoria = get_memoria()
-    print(f"   ✓ Análisis previos: {len(memoria['analisis_recientes'])}")
-    print(f"   ✓ Patrones activos: {len(memoria['patrones_activos'])}")
-    print(f"   ✓ Perfil: {len(memoria['perfil'])} campos")
-    print(f"   ✓ Carreras: {len(memoria['carreras_recientes'])}")
-    print(f"   ✓ Historia: {len(memoria['historia'])} entradas")
-    print(f"   ✓ Recovery histórico: {len(memoria['recovery_30d'])} días")
-    print(f"   ✓ Exámenes sangre: {len(memoria['examenes_sangre'])} registros")
-    print(f"   ✓ Tests rendimiento: {len(memoria['tests_rendimiento'])} registros")
+    for k in ("analisis_recientes", "patrones_activos", "perfil", "carreras_recientes", "historia",
+              "recovery_30d", "examenes_sangre", "tests_rendimiento"):
+        print(f"   ✓ {k}: {len(memoria.get(k, []))}")
 
     print("2b. Calculando Recovery Score...")
-    actividades_ayer = [
-        a for a in activities_7d
-        if a.get("start_date_local", "").startswith(yesterday_str)
-    ]
+    actividades_ayer = [a for a in activities_7d if actividad_es_hoy(a, yesterday_str)]
     recovery_resultado = procesar_recovery(wellness_30d, actividades_ayer, memoria["perfil"])
     recovery_bloque = formatear_recovery_bloque(
         recovery_resultado,
@@ -519,15 +447,18 @@ def main():
 
     print("3. Analizando con Claude...")
     mensaje, metadata, actividades_hoy, tss_dia, wellness_hoy = analizar_con_claude(
-        wellness_30d, activities_7d, events, memoria, recovery_resultado, recovery_bloque
+        wellness_30d, activities_7d, events, memoria, recovery_resultado, recovery_bloque,
+        umbrales=umbrales, proxima_carrera=proxima_carrera
     )
     print(f"   ✓ Mensaje generado ({len(mensaje)} chars)")
     print(f"   ✓ Banderas: {metadata.get('banderas', [])}")
     print(f"   ✓ Patrones nuevos: {len(metadata.get('patrones_nuevos', []))}")
 
     print("4. Enviando a Telegram...")
-    send_telegram(mensaje)
-    print("   ✓ Mensaje enviado!")
+    if send_telegram(mensaje):
+        print("   ✓ Mensaje enviado!")
+    else:
+        print("   ✗ No se pudo enviar a Telegram")
 
     print("5. Guardando en Supabase...")
     try:
@@ -550,7 +481,6 @@ def main():
     except Exception as e:
         print(f"   ⚠ Error guardando recovery: {e}")
 
-    # Guardar patrones nuevos detectados
     for patron in metadata.get("patrones_nuevos", []):
         try:
             actualizar_patron(
