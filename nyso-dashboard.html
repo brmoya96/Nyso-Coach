@@ -682,6 +682,22 @@ async function syncAll(){
   await loadAll(true);
 }
 
+// Proyecta CTL/ATL/TSB hasta hoy igual que Intervals (decaimiento 42d/7d + carga de los entrenos del día)
+function proyectarHoy(fit,acts,hoy){
+  const base=fit.filter(r=>r.fecha<hoy);
+  if(!base.length)return fit;
+  const last=base[base.length-1],out=[...base];
+  const kc=Math.exp(-1/42),ka=Math.exp(-1/7);
+  const load=f=>acts.filter(a=>a.fecha===f).reduce((s,a)=>s+(Number(a.tss)||0),0);
+  let ctl=last.ctl,atl=last.atl,f=last.fecha;
+  while(f<hoy){
+    const d=new Date(f+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);f=d.toISOString().slice(0,10);
+    const L=load(f);ctl=ctl*kc+L*(1-kc);atl=atl*ka+L*(1-ka);
+    out.push({fecha:f,ctl,atl,tsb:ctl-atl,proj:true,carga:L});
+  }
+  return out;
+}
+
 async function loadAll(forceRefresh=false){
   if(S.loaded&&!forceRefresh){return}
   try{
@@ -699,7 +715,7 @@ async function loadAll(forceRefresh=false){
     ]);
     const race=(Array.isArray(cfgR)&&cfgR[0]&&cfgR[0].valor)?cfgR[0].valor:null;
     const rm=rmAll.find(r=>n(r.hrv_hoy)!==null)||rmAll[0]||{};
-    const fitArr=Array.isArray(fitR)?fitR:[];
+    const fitArr=proyectarHoy((Array.isArray(fitR)?fitR:[]).map(r=>({...r,ctl:Number(r.ctl),atl:Number(r.atl),tsb:Number(r.tsb)})),Array.isArray(actsR)?actsR:[],today);
     // Fallback: si analisis_diarios no tiene datos de hoy, usar el último de fitness_diario
     const lastFit=fitArr[fitArr.length-1]||{};
     const adRaw=adR[0]||{};
@@ -866,8 +882,9 @@ function rFit(range){
   <div class="g3" style="margin-bottom:14px">
     <div class="ci"><div class="cl3">CTL</div><div class="cv3 cb">${(ctl??0).toFixed(0)}</div><div class="cs">Fitness</div></div>
     <div class="ci"><div class="cl3">ATL</div><div class="cv3 ca">${(atl??0).toFixed(0)}</div><div class="cs">Fatiga</div></div>
-    <div class="ci"><div class="cl3">TSB</div><div class="cv3 ${tsb>=0?'ct':'cr'}">${(tsb??0)>=0?'+':''}${(tsb??0).toFixed(1)}</div><div class="cs">Forma</div></div>
+    <div class="ci"><div class="cl3">TSB</div><div class="cv3 ${tsb>=0?'ct':'cr'}">${(tsb??0)>=0?'+':''}${(tsb??0).toFixed(1)}</div><div class="cs">Forma · ${ctl?((tsb>=0?'+':'')+Math.round(tsb/ctl*100)+'%'):''}</div></div>
   </div>
+  ${(()=>{const y=data[data.length-2];if(!lat.proj||!y)return'';return`<div style="font-size:9px;color:var(--faint);font-family:'Space Mono',monospace;text-align:center;margin:-6px 0 12px;line-height:1.6">${lat.carga?`Hoy, incluye ${Math.round(lat.carga)} TSS entrenado`:'Hoy al despertar · sin entreno aún'}<br>Ayer cerró: CTL ${y.ctl.toFixed(0)} · ATL ${y.atl.toFixed(0)} · TSB ${(y.tsb>=0?'+':'')+y.tsb.toFixed(1)}</div>`})()}
   <div class="cw">
     <svg class="csv" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       <defs>
