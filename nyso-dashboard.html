@@ -533,15 +533,34 @@ async function openAct(id,nombre){
     const fmtSecs=s=>{if(!s)return'—';const m=Math.floor(s/60);return m>60?`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}m`:`${m}m`};
     const fmtPct=(s,total)=>total>0?`${Math.round(s/total*100)}%`:'—';
     const pwTotal=(d.z1_secs||0)+(d.z2_secs||0)+(d.z3_secs||0)+(d.z4_secs||0)+(d.z5_secs||0)+(d.z6_secs||0)+(d.ss_secs||0);
-    const hrTotal=(d.hrz1_secs||0)+(d.hrz2_secs||0)+(d.hrz3_secs||0)+(d.hrz4_secs||0);
+    const hrTotal=(d.hrz1_secs||0)+(d.hrz2_secs||0)+(d.hrz3_secs||0)+(d.hrz4_secs||0)+(d.hrz5_secs||0);
     const isRide=d.tipo==='Ride'||d.tipo==='VirtualRide';
     const isRun=d.tipo==='Run'||d.tipo==='VirtualRun'||d.tipo==='TrailRun';
     const isSwim=d.tipo==='Swim';
     const intervals = (() => { try { return JSON.parse(d.intervals||'[]'); } catch { return []; } })();
     const intSummary = (() => { try { return JSON.parse(d.interval_summary||'[]'); } catch { return []; } })();
     const carbsDeficit=(d.carbs_used_g||0)-(d.carbs_ingested_g||0);
+    const act=(S.acts||[]).find(x=>x.id===id)||{};
+    const tSec=Number(d.tiempo_s)||Number(act.duracion_min)*60||0;
+    const distK=Number(d.distancia_km)||Number(act.distancia_km)||0;
+    const hms=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`};
+    const ritmo=(sec,km,por=1)=>{if(!sec||!km)return'—';const p=sec/(km/por);return`${Math.floor(p/60)}:${String(Math.round(p%60)).padStart(2,'0')}`.replace(/:60$/,':59')};
+    const vel=isRide?(distK&&tSec?(distK/(tSec/3600)).toFixed(1):null):null;
+    const velTxt=isRide?(vel?`${vel}`:'—'):isSwim?ritmo(tSec,distK*10):ritmo(tSec,distK);
+    const velUni=isRide?'km/h':isSwim?'/100m':'/km';
+    const splits=Array.isArray(d.splits)?d.splits:(()=>{try{return JSON.parse(d.splits||'[]')}catch{return[]}})();
+    const nWork=intervals.filter(iv=>iv.type==='WORK').length;
+    const TIPO_IV={WORK:['Trabajo','var(--amber)'],RECOVERY:['Recup.','var(--soft)'],WARMUP:['Calent.','var(--blue)'],COOLDOWN:['Enfr.','var(--blue)'],REST:['Pausa','var(--faint)']};
 
     document.getElementById('modal-body').innerHTML=`
+<!-- Resumen: tiempo, distancia, ritmo/velocidad, TSS -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
+  <div class="ci"><div class="cl3">Tiempo</div><div class="cv3" style="font-size:17px">${tSec?hms(tSec):'—'}</div><div class="cs">en mov.</div></div>
+  <div class="ci"><div class="cl3">Distancia</div><div class="cv3" style="font-size:17px">${distK?(isSwim?Math.round(distK*1000)+'m':distK.toFixed(2)):'—'}</div><div class="cs">${isSwim?'':'km'}</div></div>
+  <div class="ci"><div class="cl3">${isRide?'Velocidad':'Ritmo'}</div><div class="cv3 ct" style="font-size:17px">${distK?velTxt:'—'}</div><div class="cs">${velUni}</div></div>
+  <div class="ci"><div class="cl3">TSS</div><div class="cv3 ca" style="font-size:17px">${act.tss??'—'}</div><div class="cs">carga</div></div>
+</div>
+
 <!-- Métricas principales -->
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
   ${isRide&&d.potencia_avg?`<div class="ci"><div class="cl3">Potencia</div><div class="cv3 ca">${d.potencia_avg}W</div><div class="cs">avg</div></div>`:''}
@@ -576,7 +595,7 @@ ${d.carbs_used_g?`
 <!-- Zonas de potencia -->
 ${pwTotal>0?`
 <div class="card" style="margin:10px 0 0;padding:12px 14px">
-  <div class="chd" style="margin-bottom:8px">⚡ Distribución de Zonas ${isRide?'Potencia':'FC'}</div>
+  <div class="chd" style="margin-bottom:8px">⚡ Zonas de potencia</div>
   ${[
     {z:'Z1',s:d.z1_secs,col:'#3a3a55',label:'Recuperación'},
     {z:'Z2',s:d.z2_secs,col:'var(--blue)',label:'Aeróbico'},
@@ -605,7 +624,8 @@ ${hrTotal>0?`
     {z:'Z1',s:d.hrz1_secs,col:'var(--blue)',label:'Aeróbico bajo'},
     {z:'Z2',s:d.hrz2_secs,col:'var(--teal)',label:'Aeróbico'},
     {z:'Z3',s:d.hrz3_secs,col:'var(--amber)',label:'Tempo'},
-    {z:'Z4',s:d.hrz4_secs,col:'var(--rose)',label:'Umbral/VO2'},
+    {z:'Z4',s:d.hrz4_secs,col:'var(--rose)',label:'Umbral'},
+    {z:'Z5',s:(d.hrz5_secs>=30?d.hrz5_secs:0),col:'#ff0080',label:'VO2max'},
   ].filter(z=>z.s>0).map(z=>`
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
     <span style="width:22px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace;flex-shrink:0">${z.z}</span>
@@ -617,35 +637,51 @@ ${hrTotal>0?`
   </div>`).join('')}
 </div>`:''}
 
-<!-- Intervalos -->
-${intSummary.length?`
+<!-- Intervalos: todos, con tipo -->
+${intervals.length?`
 <div class="card" style="margin:10px 0 0;padding:12px 14px">
-  <div class="chd" style="margin-bottom:8px">🎯 Intervalos</div>
-  ${intSummary.map((iv,i)=>`
-  <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--edge)">
-    <span style="width:20px;font-size:9px;color:var(--faint);font-family:'Space Mono',monospace">${i+1}</span>
-    <span style="font-size:11px;color:var(--txt);font-family:'Space Mono',monospace">${iv}</span>
-  </div>`).join('')}
-</div>`:''}
-
-<!-- Tabla de intervalos detallada (si hay WORK intervals) -->
-${intervals.filter(iv=>iv.type==='WORK').length>0?`
-<div class="card" style="margin:10px 0 0;padding:12px 14px">
-  <div class="chd" style="margin-bottom:8px">📊 Detalle Intervalos WORK</div>
+  <div class="chd" style="margin-bottom:8px">🎯 Intervalos <span style="color:var(--faint)">${intervals.length} · ${nWork} de trabajo</span></div>
   <table class="vt">
-    <thead><tr><th>#</th><th>Dur</th><th>${isRide?'W avg':'Pace'}</th><th>FC</th><th>IF%</th></tr></thead>
+    <thead><tr><th>#</th><th>Tipo</th><th>Dur</th><th>Dist</th><th>${isRide?'W':'Ritmo'}</th><th>FC</th></tr></thead>
     <tbody>
-    ${intervals.filter(iv=>iv.type==='WORK').map((iv,i)=>`
-    <tr>
+    ${intervals.map((iv,i)=>{const t=TIPO_IV[iv.type]||[iv.type||'—','var(--soft)'];return`
+    <tr style="${iv.type==='WORK'?'background:#ffb83008':''}">
       <td style="color:var(--faint)">${i+1}</td>
-      <td style="color:var(--soft)">${fmtSecs(Number(iv.duration_seconds))}</td>
-      <td style="color:var(--amber);font-weight:600">${isRide&&iv.average_power?iv.average_power+'W':iv.average_pace||'—'}</td>
+      <td style="color:${t[1]};font-size:10px">${t[0]}</td>
+      <td style="color:var(--soft)">${hms(Number(iv.duration_seconds)||0)}</td>
+      <td style="color:var(--soft)">${iv.distance_km?Number(iv.distance_km).toFixed(2):'—'}</td>
+      <td style="color:${iv.type==='WORK'?'var(--amber)':'var(--txt)'};font-weight:600">${isRide?(iv.average_power?iv.average_power+'W':'—'):(iv.average_pace||'—').replace('/km','')}</td>
       <td style="color:var(--blue)">${iv.average_hr||'—'}</td>
-      <td style="color:var(--soft)">${iv.intensity?Math.round(Number(iv.intensity))+'%':'—'}</td>
-    </tr>`).join('')}
+    </tr>`}).join('')}
     </tbody>
   </table>
+  ${nWork<=1&&tSec>1800&&!isSwim?`<div class="pdesc" style="margin-top:8px">Intervals solo encontró ${nWork||'ningún'} tramo de trabajo. Para que cada cambio de ritmo salga como intervalo, marca vuelta (Lap) en el reloj al empezar y terminar cada uno, o usa un entrenamiento estructurado. Mientras, mira los splits.</div>`:''}
 </div>`:''}
+
+<!-- Splits por km (trote) o cada 5 km (bici) -->
+${splits.length?(()=>{
+  const paso=isRide?5:1;
+  const v=splits.map(sp=>sp.km&&sp.s?sp.km/sp.s:0);
+  const vMax=Math.max(...v),vMin=Math.min(...v.filter(x=>x>0));
+  const iMax=v.indexOf(vMax);
+  return`
+<div class="card" style="margin:10px 0 0;padding:12px 14px">
+  <div class="chd" style="margin-bottom:8px">📏 Splits cada ${paso} km</div>
+  <table class="vt">
+    <thead><tr><th>Km</th><th>Tiempo</th><th>${isRide?'km/h':'Ritmo'}</th><th></th><th>FC</th><th>W</th></tr></thead>
+    <tbody>
+    ${splits.map((sp,i)=>{const r=isRide?(sp.s?(sp.km/(sp.s/3600)).toFixed(1):'—'):ritmo(sp.s,sp.km);const w=vMax>vMin?Math.round(15+85*(v[i]-vMin)/(vMax-vMin)):60;return`
+    <tr>
+      <td style="color:var(--faint)">${sp.parcial?sp.km.toFixed(2):Math.round(sp.n*paso)}</td>
+      <td style="color:var(--soft)">${hms(sp.s)}</td>
+      <td style="color:${i===iMax?'var(--teal)':'var(--txt)'};font-weight:600">${r}</td>
+      <td style="width:28%"><div style="height:6px;border-radius:3px;background:${i===iMax?'var(--teal)':'#4d9fff80'};width:${w}%"></div></td>
+      <td style="color:var(--blue)">${sp.hr??'—'}</td>
+      <td style="color:var(--soft)">${sp.w??'—'}</td>
+    </tr>`}).join('')}
+    </tbody>
+  </table>
+</div>`})():''}
 
 ${famDep(d.tipo)==='fuerza'?'':'<div id="nutri-box"></div>'}
 
