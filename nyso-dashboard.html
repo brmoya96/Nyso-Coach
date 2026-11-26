@@ -750,7 +750,7 @@ function rRec(){
 
   document.getElementById('rc').innerHTML=`
 <!-- HERO RECOVERY — button para touch nativo -->
-<button class="hero" style="border-color:${rcol}44;width:calc(100% - 24px);text-align:left" onclick="openModal('recovery')">
+<div class="hero" role="button" style="border-color:${rcol}44" onclick="openModal('recovery')">
   ${ring(rs,rcol,104,11,`<span class="rn ${rk}">${rs}</span><span class="ru">%</span>`)}
   <div class="hr">
     <div class="hl">Recovery Score</div>
@@ -764,7 +764,9 @@ function rRec(){
     ${!isToday?`<div class="stale">⏱ Datos del ${(rm.fecha||'').slice(5)} · sync 9am</div>`:''}
     <div class="tap-hint">Toca para historial →</div>
   </div>
-</button>
+</div>
+
+${cargaHoyHTML(rs,ctl)}
 
 ${hoyTocaHTML()}
 
@@ -954,6 +956,31 @@ function rFit(range){
     else ins.push(`🏁 <b>${rn} ${diff}d</b>: CTL ${(ctl??0).toFixed(0)} excelente. Foco en calidad: race pace, brick workouts y ensayos nutricionales.`);
     return ins.map(i=>`<div class="ins" style="border-color:var(--blue);margin-bottom:6px">${i}</div>`).join('');
   })()}
+</div>`;
+}
+
+// ── CARGA DE HOY (tipo Strain WHOOP): TSS del día vs rango según el recovery de la mañana ──
+function cargaHoyHTML(rs,ctl){
+  const hoy=td(),c=Number(ctl)||0;if(!c)return'';
+  const acts=(S.acts||[]).filter(a=>a.fecha===hoy);
+  const tss=Math.round(acts.reduce((s,a)=>s+(Number(a.tss)||0),0));
+  const min=acts.reduce((s,a)=>s+(Number(a.duracion_min)||0),0);
+  const [f1,f2,txt]=rs>=67?[1.0,1.6,'Recovery alto: puedes cargar fuerte']:rs>=34?[0.7,1.2,'Recovery medio: carga moderada']:[0,0.6,'Recovery bajo: día suave o descanso'];
+  const lo=Math.round(c*f1),hi=Math.round(c*f2),max=Math.max(c*2,tss*1.1);
+  const pct=v=>Math.min(100,v/max*100);
+  const plan=(S.plan||[]).filter(p=>p.fecha===hoy).reduce((s,p)=>s+(Number(p.tss_estimado)||0),0);
+  let col,est;
+  if(tss>hi*1.15){col='var(--rose)';est=`Te pasaste ${tss-hi} TSS sobre lo recomendado para tu recovery. Prioriza comida, hidratación y sueño esta noche.`}
+  else if(tss>=lo){col='var(--teal)';est=tss>hi?'Justo sobre el rango, sin problema.':'En rango para tu recovery de hoy.'}
+  else{col='var(--amber)';est=tss?`Margen disponible: hasta ~${hi-tss} TSS más.`:`Sin entreno aún. Rango sugerido: ${lo}–${hi} TSS.`}
+  return `<div class="card">
+  <div class="chd">⚡ Carga de hoy <span style="color:var(--faint)">${acts.length?`${acts.length} sesión${acts.length>1?'es':''} · ${durTxt(min)}`:'sin sesiones'}</span></div>
+  <div style="display:flex;align-items:baseline;gap:8px"><span class="mv" style="color:${col}">${tss}</span><span style="font-size:10px;color:var(--soft);font-family:'Space Mono',monospace">TSS · rango ${lo}–${hi}${plan?` · plan ${plan}`:''}</span></div>
+  <div style="position:relative;height:10px;background:var(--edge);border-radius:5px;margin:8px 0 4px;overflow:hidden">
+    <div style="position:absolute;left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%;top:0;bottom:0;background:#00e5c822;border-left:1px solid #00e5c860;border-right:1px solid #00e5c860"></div>
+    <div style="position:absolute;left:0;top:0;bottom:0;width:${pct(tss)}%;background:${col};border-radius:5px;opacity:.85"></div>
+  </div>
+  <div class="ins" style="border-color:${col}">${est} <span style="color:var(--faint)">${txt}.</span></div>
 </div>`;
 }
 
